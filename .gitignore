@@ -1,0 +1,6 @@
+dist/
+.env
+.DS_Store
+.idea/
+.trea/
+.fleet/
