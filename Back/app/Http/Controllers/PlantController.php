@@ -22,7 +22,14 @@ class PlantController extends Controller
      */
     public function create()
     {
-
+        // Exemple de données à envoyer dans le corps de la requête
+        //        {
+        //            "name": "Tulipe",
+        //            "description": "Une belle tulipe colorée",
+        //            "image": "tulipe.jpg",
+        //            "categories": ["01jv888wdxeys7rvx56xga3ger", "01jv888wdzkr6bpgzfzaj2q1jd"],
+        //            "types": ["01jv888we16thndv73yhjef0nj"]
+        //        }
     }
 
     /**
@@ -30,7 +37,33 @@ class PlantController extends Controller
      */
     public function store(Request $request)
     {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'categories' => 'array|exists:plant_categories,id',
+                'types' => 'array|exists:plant_types,id',
+            ]);
 
+            $plant = Plant::create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'image' => $request->image,
+            ]);
+
+            if ($request->has('categories')) {
+                $plant->categories()->sync($request->categories);
+            }
+
+            if ($request->has('types')) {
+                $plant->types()->sync($request->types);
+            }
+
+            return response()->json($plant, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => 'Validation failed', 'details' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An unexpected error occurred', 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**

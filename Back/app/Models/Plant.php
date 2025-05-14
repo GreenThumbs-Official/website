@@ -12,6 +12,12 @@ class Plant extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
+    protected $fillable = [
+        'name',
+        'description',
+        'image'
+    ];
+
     public function categories()
     {
         return $this->belongsToMany(PlantCategory::class, 'plant_category_plant');
