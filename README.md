@@ -11,7 +11,7 @@ git checkout main
 git pull
 
 # Merge ta branche avec main
-git merge ta-branche
+git merge ta-branche --no-edit
 # Verifier s'il y a des conflits
 
 # Push main avec les changement de sa branche
@@ -28,7 +28,7 @@ git checkout ta-branche
 git pull
 
 # Merge ta branche avec main
-git merge main
+git merge main --no-edit
 # Verifier s'il y a des conflits
 
 # Push main avec les changement de sa branche
