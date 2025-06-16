@@ -4,9 +4,8 @@ case "$1" in
   up)
     docker compose up -d
     docker compose exec app composer install
-    docker compose exec cp ./.env.example ./.env
+    docker compose exec app cp ./.env.example ./.env
     docker compose exec app php artisan key:generate
-    docker compose exec app php artisan migrate --seed
     ;;
   down)
     docker compose down
@@ -17,8 +16,14 @@ case "$1" in
   logs)
     docker compose logs -f
     ;;
+  destroy)
+    docker compose exec app rm -rf ./vendor
+    docker compose exec app rm ./composer.lock
+    docker compose exec app rm ./.env
+    docker compose down --volumes
+    ;;
   *)
-    echo "Usage: $0 {up|down|build|logs}"
+    echo "Usage: $0 {up|down|build|logs|destroy}"
     exit 1
     ;;
 esac
