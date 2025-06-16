@@ -1,27 +1,33 @@
+import { createElement } from "react";
+
 function Plants(){
     
     async function afficherPlants() {
 
         const reponse = await fetch("http://127.0.0.1:8000/api/plants");
-        const plant = await reponse.json();
+        const plants = await reponse.json();
 
-        const stockPlants = document.getElementById('classPlants');
-        const onePlant = document.createElement('div');
-        const plantName = document.createElement('p');
-        const plantImg = document.createElement('img');
+        plants.data.forEach((plant) =>{
+            let plantStock = document.createElement('div');
+            let plantName = document.createElement('h3');
+            let plantImg = document.createElement('img');
+            const plantSection = document.querySelector('.classPlants')
 
-        plantName.textContent = plant.name;
-        plantImg.src = plant.img;
+            plantName.textContent = plant.name
+            plantImg.setAttribute('src', plant.image)
+            console.log(plantImg)
+            console.log(plantName);
 
-        stockPlants.appendChild(onePlant);
-        onePlant.appendChild(plantName);
-        onePlant.appendChild(plantImg);
-        
+            plantStock.appendChild(plantName)
+            plantStock.appendChild(plantImg)
+            console.log(plantSection)            
+            plantSection.appendChild(plantStock)
+        })
     }
     afficherPlants()
 
     return (
-        <section classPlants="grid grid-cols-3 gap-20">
+        <section className="classPlants grid grid-cols-3 gap-20">
 
         </section>
     )
