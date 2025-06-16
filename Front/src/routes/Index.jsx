@@ -1,17 +1,20 @@
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-
+import React from 'react';
+import Header from '@/components/Header';
+import Hero from '@/components/Hero';
+import Features from '@/components/Features';
+import ProductShowcase from '@/components/ProductShowcase';
+import CareGuide from '@/components/CareGuide';
+import Background from '@/components/Background';
 
 export default function Home() {
-    const navigate = useNavigate();
-
     return (
-        <div className="flex flex-col gap-12 items-center justify-center">
-            <h1 className="text-5xl font-extrabold">GreenThumbs</h1>
-            <Button onClick={() => navigate('/Plants')}><span className="mt-1">Start</span></Button>
+        <div className="min-h-screen bg-[#6fbc29] text-white overflow-hidden">
+            <Background />
+            <Header />
+            <Hero />
+            <Features />
+            <ProductShowcase />
+            <CareGuide />
         </div>
-    )
-
-    
+    );
 }
-
