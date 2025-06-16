@@ -42,13 +42,6 @@
     php artisan serve
    ```
 
-## Setup (With Docker)
-
-1. Build and start the containers:
-   ```shell
-    ./infra.sh start
-   ```
-
 2. The backend should now be running inside Docker.
 
 ## Accessible Domains

@@ -1,4 +1,16 @@
-# website
+# Setup the whole project in only a few commands
+### 1. Clone the repository:
+
+```shell
+  git clone url-repository
+  cd website
+```
+
+### 2. Setup Project with docker
+
+```shell
+  ./infra.sh up
+```
 
 ## Comment merge le main avec sa branche
 *\<nouvelles info de ta branche> => \<main>*
