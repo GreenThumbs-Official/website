@@ -15,7 +15,7 @@ class PlantSeeder extends Seeder
             'image' => 'tomato.jpg',
             'origin' => 'South America',
             'length' => 120,
-            'fruit_production_month' => 'July',
+            'fruit_production_month' => 7,
             'max_temp' => 35,
             'min_temp' => 10
         ]);
@@ -25,7 +25,7 @@ class PlantSeeder extends Seeder
             'image' => 'basil.jpg',
             'origin' => 'India',
             'length' => 40,
-            'fruit_production_month' => 'August',
+            'fruit_production_month' => 8,
             'max_temp' => 30,
             'min_temp' => 12
         ]);
@@ -35,7 +35,7 @@ class PlantSeeder extends Seeder
             'image' => 'strawberry.jpg',
             'origin' => 'Europe',
             'length' => 25,
-            'fruit_production_month' => 'June',
+            'fruit_production_month' => 6,
             'max_temp' => 28,
             'min_temp' => 5
         ]);
