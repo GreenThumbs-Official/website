@@ -13,7 +13,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('description');
             $table->string('image');
-            // ...removed category_id and type_id...
+            $table->string('origin');
+            $table->decimal('length', 8, 2); // in meters
+            $table->unsignedTinyInteger('fruit_production_month')->nullable();
+            $table->integer('max_temp');
+            $table->integer('min_temp');
             $table->timestamps();
         });
     }

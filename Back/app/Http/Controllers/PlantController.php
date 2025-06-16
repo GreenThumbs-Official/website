@@ -13,7 +13,7 @@ class PlantController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        $plants = Plant::with(['categories', 'types'])->paginate($perPage);
+        $plants = Plant::paginate($perPage);
 
         return response()->json($plants);
     }
