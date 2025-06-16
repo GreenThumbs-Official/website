@@ -10,9 +10,10 @@ class PlantController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $plants = Plant::with(['categories', 'types'])->get();
+        $perPage = $request->input('per_page', 10);
+        $plants = Plant::with(['categories', 'types'])->paginate($perPage);
 
         return response()->json($plants);
     }
