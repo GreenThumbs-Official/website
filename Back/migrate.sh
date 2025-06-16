@@ -10,6 +10,10 @@ case "$1" in
   reset)
     docker compose exec app php artisan migrate:reset
     ;;
+  refresh)
+    docker compose exec app php artisan migrate:reset
+    docker compose exec app php artisan migrate --seed
+    ;;
   *)
     echo "Usage: $0 {setup|rollback|reset}"
     exit 1

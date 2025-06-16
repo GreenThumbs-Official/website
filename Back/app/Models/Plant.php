@@ -15,17 +15,12 @@ class Plant extends Model
     protected $fillable = [
         'name',
         'description',
-        'image'
+        'image',
+        'origin',
+        'length',
+        'fruit_production_month',
+        'max_temp',
+        'min_temp'
     ];
-
-    public function categories()
-    {
-        return $this->belongsToMany(PlantCategory::class, 'plant_category_plant');
-    }
-
-    public function types()
-    {
-        return $this->belongsToMany(PlantType::class, 'plant_type_plant');
-    }
 }
 
