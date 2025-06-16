@@ -34,5 +34,3 @@ git merge main --no-edit
 # Push main avec les changement de sa branche
 git push origin ta-branche
 ```
-
-Hello
