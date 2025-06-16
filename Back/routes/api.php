@@ -13,3 +13,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::apiResource('plants', PlantController::class);
+
+Route::fallback(function () {
+    return response()->json([
+        'error' => 'Route not found',
+        'message' => 'The requested api endpoint does not exist',
+        'status_code' => 404
+    ], 404);
+});
