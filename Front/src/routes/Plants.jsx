@@ -4,7 +4,7 @@ function Plants(){
     
     async function afficherPlants() {
 
-        const reponse = await fetch("http://127.0.0.1:8000/api/plants");
+        const reponse = await fetch("https://trefle.io/api/v1/plants?token=Ai9WDZnepRthk8TMlxxYtR_I_LstmXExGEEBcHO-iCQ");
         const plants = await reponse.json();
 
         plants.data.forEach((plant) =>{
@@ -13,8 +13,8 @@ function Plants(){
             let plantImg = document.createElement('img');
             const plantSection = document.querySelector('.classPlants')
 
-            plantName.textContent = plant.name
-            plantImg.setAttribute('src', plant.image)
+            plantName.textContent = plant.common_name
+            plantImg.setAttribute('src', plant.image_url)
             console.log(plantImg)
             console.log(plantName);
 
