@@ -14,7 +14,7 @@ export default function Header() {
           <a href="#home" className="hover:text-gray-200 transition-colors">Accueil</a>
           <a href="#products" className="hover:text-gray-200 transition-colors">Produits</a>
           <a href="#care" className="hover:text-gray-200 transition-colors">Tutoriels</a>
-          <a href="#contact" className="hover:text-gray-200 transition-colors">Contact</a>
+          <a href="/contact" className="hover:text-gray-200 transition-colors">Contact</a>
         </div>
       </nav>
     </header>
