@@ -1,30 +1,34 @@
 import React from 'react';
-
+import { createElement } from "react";
 
 export default function Features() {
-    // async function afficherMeteo() {
+    async function afficherMeteo() {
 
-    //     const reponse = await fetch("https://api.tomorrow.io/v4/weather/forecast?location=45.750000,4.850000&apikey=ZKj5bwVVSdpMtzqha7CCQzsWJvCHZq3S");
-    //     const meteos = await reponse.json();
+        const reponse = await fetch("https://api.tomorrow.io/v4/weather/forecast?location=45.750000,4.850000&timesteps=1d&apikey=ZKj5bwVVSdpMtzqha7CCQzsWJvCHZq3S");
+        const meteos = await reponse.json();
 
-    //     meteos.data.forEach((meteo) =>{
-    //         let meteoStock = document.createElement('div');
-    //         let MeteoTemp = document.createElement('p');
-    //         let MeteoDate = document.createElement('p');
-    //         const MeteoSection = document.querySelector('.MeteoClass')
+        meteos.timelines.daily.forEach((meteo) =>{
+            let meteoStock = document.createElement('div');
+            let MeteoTemp = document.createElement('p');
+            let MeteoDate = document.createElement('p');
+            const MeteoSection = document.querySelector('.MeteoClass')
 
-    //         MeteoTemp.textContent = meteo.temperature
-    //         plantImg.setAttribute('src', meteo.image)
-    //         console.log(plantImg)
-    //         console.log(plantName);
+            MeteoTemp.textContent = meteo.values.temperatureApparentAvg + "°c"
+            const date = new Date(meteo.time);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const dateFr = new Intl.DateTimeFormat('fr-FR', options).format(date);
 
-    //         plantStock.appendChild(plantName)
-    //         plantStock.appendChild(plantImg)
-    //         console.log(plantSection)            
-    //         plantSection.appendChild(plantStock)
-    //     })
-    // }
-    // afficherPlants()
+            MeteoDate.textContent = dateFr;
+            console.log(MeteoTemp)
+            console.log(MeteoDate);
+
+            meteoStock.appendChild(MeteoTemp)
+            meteoStock.appendChild(MeteoDate)
+            console.log(MeteoSection)            
+            MeteoSection.appendChild(meteoStock)
+        })
+    }
+    afficherMeteo()
 
   return (
     <section className="py-16 px-4">
