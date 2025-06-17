@@ -11,9 +11,29 @@ import { cn } from "@/lib/utils";
 export default function Contact() {
     const navigate = useNavigate();
 
-    const manageSubmit = (e) => {
+    const manageSubmit = async (e) => {
         e.preventDefault();
-        console.log("Submitted");
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetch('https://formspree.io/f/xblyyqnl', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                alert('Message sent successfully!');
+                e.target.reset();
+            } else {
+                alert('Error while sending message.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error while sending message.');
+        }
     };
 
     return (
