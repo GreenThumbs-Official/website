@@ -1,38 +1,81 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
-export default function Home() {
+export default function Contact() {
     const navigate = useNavigate();
 
+    const manageSubmit = (e) => {
+        e.preventDefault();
+        console.log("Submitted");
+    };
+
     return (
-    <div class="max-w-xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-2xl">
-        <form action="" method="post" class="space-y-6">
-            <div>
-                <input type="text" name="nom" id="nom" placeholder="Nom"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-                <input type="text" name="prenom" id="prenom" placeholder="Prénom"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-                <input type="email" name="email" id="email" placeholder="Email"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-                <input type="text" name="tel" id="tel" placeholder="Téléphone"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-                <label for="message" class="block mb-2 font-medium text-gray-700">Message :</label>
-                <textarea name="message" id="message" rows="4"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-            </div>
-            <div>
-                <input type="submit" value="Envoyer"
-                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 cursor-pointer" />
-            </div>
-        </form>
-    </div>
-    )
+        <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-2xl">
+            <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Contactez-nous</h1>
+            <form onSubmit={manageSubmit} className="space-y-6">
+                <div className="space-y-2">
+                    <Label htmlFor="nom">Nom</Label>
+                    <Input 
+                        type="text" 
+                        name="nom" 
+                        id="nom" 
+                        placeholder="Votre nom"
+                        required
+                    />
+                </div>
+                
+                <div className="space-y-2">
+                    <Label htmlFor="prenom">Prénom</Label>
+                    <Input 
+                        type="text" 
+                        name="prenom" 
+                        id="prenom" 
+                        placeholder="Votre prénom"
+                        required
+                    />
+                </div>
+                
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input 
+                        type="email" 
+                        name="email" 
+                        id="email" 
+                        placeholder="votre.email@exemple.com"
+                        required
+                    />
+                </div>
+                
+                <div className="space-y-2">
+                    <Label htmlFor="tel">Téléphone</Label>
+                    <Input 
+                        type="tel" 
+                        name="tel" 
+                        id="tel" 
+                        placeholder="Votre numéro de téléphone"
+                    />
+                </div>
+                
+                <div className="space-y-2">
+                    <Label htmlFor="message">Message</Label>
+                    <Textarea 
+                        name="message" 
+                        id="message" 
+                        rows={4}
+                        placeholder="Votre message..."
+                        required
+                    />
+                </div>
+                
+                <Button type="submit" className="w-full">
+                    Envoyer
+                </Button>
+            </form>
+        </div>
+    );
 }
