@@ -25,17 +25,20 @@
   ./infra.sh up
 ```
 
-### 3. Setup Back-Side with local
+## Installation without docker
+
+### 1. Setup Back-Side with local
 
 ```shell
   cd Back
   composer install
   cp .env.example .env
+  php artisan key:generate
   php artisan migrate --seed
   php artisan serve
 ```
 
-### 4. Setup Front-Side with local
+### 2. Setup Front-Side with local
 
 ```shell
   cd Front
