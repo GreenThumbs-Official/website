@@ -19,46 +19,22 @@ class PlantController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        // Exemple de données à envoyer dans le corps de la requête
-        //        {
-        //            "name": "Tulipe",
-        //            "description": "Une belle tulipe colorée",
-        //            "image": "tulipe.jpg",
-        //            "categories": ["01jv888wdxeys7rvx56xga3ger", "01jv888wdzkr6bpgzfzaj2q1jd"],
-        //            "types": ["01jv888we16thndv73yhjef0nj"]
-        //        }
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'categories' => 'array|exists:plant_categories,id',
-                'types' => 'array|exists:plant_types,id',
+                'description' => 'nullable|string',
+                'image' => 'nullable|string',
+                'origin' => 'nullable|string|max:255',
+                'length' => 'nullable|numeric',
+                'fruit_production_month' => 'required|integer|between:1,12',
+                'max_temp' => 'nullable|numeric',
+                'min_temp' => 'nullable|numeric',
             ]);
-
-            $plant = Plant::create([
-                'name' => $request->name,
-                'description' => $request->description,
-                'image' => $request->image,
-            ]);
-
-            if ($request->has('categories')) {
-                $plant->categories()->sync($request->categories);
-            }
-
-            if ($request->has('types')) {
-                $plant->types()->sync($request->types);
-            }
-
+            $plant = Plant::create($validated);
             return response()->json($plant, 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => 'Validation failed', 'details' => $e->errors()], 422);
@@ -72,15 +48,7 @@ class PlantController extends Controller
      */
     public function show(Plant $plant)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Plant $plant)
-    {
-        //
+        return response()->json($plant);
     }
 
     /**
@@ -88,7 +56,24 @@ class PlantController extends Controller
      */
     public function update(Request $request, Plant $plant)
     {
-        //
+        try {
+            $validated = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'description' => 'nullable|string',
+                'image' => 'nullable|string',
+                'origin' => 'nullable|string|max:255',
+                'length' => 'nullable|numeric',
+                'fruit_production_month' => 'sometimes|required|integer|between:1,12',
+                'max_temp' => 'nullable|numeric',
+                'min_temp' => 'nullable|numeric',
+            ]);
+            $plant->update($validated);
+            return response()->json($plant);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => 'Validation failed', 'details' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An unexpected error occurred', 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -96,6 +81,7 @@ class PlantController extends Controller
      */
     public function destroy(Plant $plant)
     {
-        //
+        $plant->delete();
+        return response()->json(['message' => 'Plant deleted successfully']);
     }
 }
