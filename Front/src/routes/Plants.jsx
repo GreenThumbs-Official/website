@@ -4,16 +4,24 @@ function Plants(){
     
     async function afficherPlants() {
 
-        const reponse = await fetch("https://trefle.io/api/v1/plants?token=Ai9WDZnepRthk8TMlxxYtR_I_LstmXExGEEBcHO-iCQ");
+        const reponse = await fetch("http://127.0.0.1:8000/api/plants");
         const plants = await reponse.json();
 
         plants.data.forEach((plant) =>{
             let plantStock = document.createElement('div');
             let plantName = document.createElement('h3');
             let plantImg = document.createElement('img');
+            // let buttonView;
+
+            // buttonView.innerHTML = `
+            //     <button className="w-full py-2 rounded-full bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 hover:bg-opacity-30 transition-all">
+            //       Voir la plante
+            //     </button>
+            // `
+
             const plantSection = document.querySelector('.classPlants')
 
-            plantName.textContent = plant.common_name
+            plantName.textContent = plant.name
             plantImg.setAttribute('src', plant.image_url)
             console.log(plantImg)
             console.log(plantName);
@@ -22,6 +30,7 @@ function Plants(){
             plantStock.appendChild(plantImg)
             console.log(plantSection)            
             plantSection.appendChild(plantStock)
+            // plantSection.appendChild(buttonView)
         })
     }
     afficherPlants()
