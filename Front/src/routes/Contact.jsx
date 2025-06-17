@@ -6,7 +6,7 @@ export default function Home() {
 
     return (
     <div class="max-w-xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-2xl">
-        <form action="" method="post" class="space-y-6">
+        <form action="https://formspree.io/f/xblyyqnl" method="post" class="space-y-6">
             <div>
                 <input type="text" name="nom" id="nom" placeholder="Nom"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
