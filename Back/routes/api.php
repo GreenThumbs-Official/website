@@ -22,7 +22,12 @@ Route::middleware('auth:sanctum')->get('/user-profile', function (Request $reque
 /**
  * Default route used to get all plants
  */
-Route::apiResource('plants', PlantController::class);
+Route::get('/plants', [PlantController::class, 'index']);
+Route::middleware(['auth:sanctum', 'can:isAdmin'])->group(function () {
+    Route::post('/plants', [PlantController::class, 'store']);
+    Route::put('/plants/{plant}', [PlantController::class, 'update']);
+    Route::delete('/plants/{plant}', [PlantController::class, 'destroy']);
+});
 
 
 /**
