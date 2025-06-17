@@ -1,4 +1,17 @@
-# Setup the whole project in only a few commands
+# GreenThumbs
+
+...
+
+## Prerequisites
+
+- PHP 7.4 +
+- MySQL 5.7 +
+- Composer
+- Web server 
+- Docker (optional)
+
+## Installation
+
 ### 1. Clone the repository:
 
 ```shell
@@ -11,6 +24,24 @@
 ```shell
   ./infra.sh up
 ```
+
+### 3. Setup Back-Side with local
+
+```shell
+  cd Back
+  composer install
+  cp .env.example .env
+  php artisan migrate --seed
+```
+
+### 4. Setup Front-Side with local
+
+```shell
+  cd Front
+  npm install
+  npm run dev
+```
+
 
 ## Comment merge le main avec sa branche
 *\<nouvelles info de ta branche> => \<main>*
