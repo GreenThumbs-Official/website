@@ -37,6 +37,9 @@ export default function CareGuide() {
             </div>
           ))}
         </div>
+        <button className="w-96 py-2 rounded-full bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 hover:bg-opacity-30 transition-all">
+          Voir d'autres conseils pour vos plantes
+        </button>
       </div>
     </section>
   );
