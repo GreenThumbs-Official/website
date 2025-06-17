@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
-import Meteo from '@/components/Meteo';
+import Weather from '@/components/Weather';
 import ProductShowcase from '@/components/ProductShowcase';
 import CareGuide from '@/components/CareGuide';
 import Background from '@/components/Background';
@@ -12,7 +12,7 @@ export default function Home() {
             <Background />
             <Header />
             <Hero />
-            <Meteo />
+            <Weather />
             <ProductShowcase />
             <CareGuide />
         </div>

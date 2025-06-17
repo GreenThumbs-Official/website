@@ -1,8 +1,8 @@
 import React from 'react';
 import { createElement } from "react";
 
-export default function Features() {
-    async function afficherMeteo() {
+export default function Weather() {
+    async function renderWeather() {
 
         const reponse = await fetch("https://api.tomorrow.io/v4/weather/forecast?location=45.750000,4.850000&timesteps=1d&apikey=ZKj5bwVVSdpMtzqha7CCQzsWJvCHZq3S");
         const meteos = await reponse.json();
@@ -28,7 +28,7 @@ export default function Features() {
             MeteoSection.appendChild(meteoStock)
         })
     }
-    afficherMeteo()
+    renderWeather()
 
   return (
     <section className="py-16 px-4">
