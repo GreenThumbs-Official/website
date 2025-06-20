@@ -49,7 +49,7 @@ export default function PlantsPage() {
         <div className="flex flex-col gap-12 items-start justify-start pt-10 pl-16 min-h-screen bg-[#6fbc29] text-white overflow-hidden">
             <Background />
             <Header />
-            <h2 className="text-5xl font-bold pt-16">Les différentes plantes !</h2>
+            <h2 className="text-5xl font-light mt-28 ml-12 leading-tight">Les différentes plantes !</h2>
             <Plants />
         </div>
     )

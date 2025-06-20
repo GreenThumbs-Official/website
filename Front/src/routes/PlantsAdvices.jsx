@@ -101,12 +101,12 @@ export default function TipsShowcase() {
                   <Header />
         <h1 className="text-5xl font-light mt-28 ml-12 leading-tight">Tout type de conseils pour être un expert en verdure !</h1>
       <div className="max-w-6xl mx-auto">
-        <div>
+        <div> 
             <h2 className="text-4xl font-normal mb-2 pt-12">Conseils pour les premières pousses</h2>
           {starterTips.map((starterTips) => (
             <div
               key={starterTips.id}
-              className="bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 rounded-3xl overflow-hidden transition-transform hover:-translate-y-2"
+              className="bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 rounded-3xl overflow-hidden transition-transform hover:-translate-y-2 mt-8"
             >
                 
               <div className="p-6">
@@ -120,7 +120,7 @@ export default function TipsShowcase() {
           {advancedTips.map((advancedTips) => (
             <div
               key={advancedTips.id}
-              className="bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 rounded-3xl overflow-hidden transition-transform hover:-translate-y-2"
+              className="bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 rounded-3xl overflow-hidden transition-transform hover:-translate-y-2 mt-8"
             >
                 
               <div className="p-6 text-right">
@@ -134,7 +134,7 @@ export default function TipsShowcase() {
           {proTips.map((proTips) => (
             <div
               key={proTips.id}
-              className="bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 rounded-3xl overflow-hidden transition-transform hover:-translate-y-2"
+              className="bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 rounded-3xl overflow-hidden transition-transform hover:-translate-y-2 mt-8"
             >
                 
               <div className="p-6">
