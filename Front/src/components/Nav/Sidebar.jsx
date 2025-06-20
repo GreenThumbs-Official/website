@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Background from '../Background';
+import Background from '@/components/ui/background';
 import { cn } from '@/lib/utils';
 
 export default function Sidebar ({ className, children, userType = 'user', ...props }) {
