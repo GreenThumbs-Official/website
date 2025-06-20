@@ -1,4 +1,6 @@
 import { createElement } from "react";
+import Header from '@/components/Header';
+import Background from '@/components/Background';
 
 function Plants(){
     
@@ -11,26 +13,25 @@ function Plants(){
             let plantStock = document.createElement('div');
             let plantName = document.createElement('h3');
             let plantImg = document.createElement('img');
-            // let buttonView;
+            let plantLink = document.createElement('a');
+            let buttonView = document.createElement('button');
 
-            // buttonView.innerHTML = `
-            //     <button className="w-full py-2 rounded-full bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 hover:bg-opacity-30 transition-all">
-            //       Voir la plante
-            //     </button>
-            // `
 
             const plantSection = document.querySelector('.classPlants')
-
+ 
             plantName.textContent = plant.name
             plantImg.setAttribute('src', plant.image_url)
+            plantLink.setAttribute('href', "PlantDetails/" + plant.id)
+            plantLink.textContent = "Voir les détails de la plante"
             console.log(plantImg)
             console.log(plantName);
 
             plantStock.appendChild(plantName)
             plantStock.appendChild(plantImg)
+            plantStock.appendChild(buttonView)
+            buttonView.appendChild(plantLink)
             console.log(plantSection)            
             plantSection.appendChild(plantStock)
-            // plantSection.appendChild(buttonView)
         })
     }
     afficherPlants()
@@ -45,8 +46,10 @@ function Plants(){
 export default function PlantsPage() {
 
     return (
-        <div className="flex flex-col gap-12 items-start justify-start pt-10 pl-16">
-            <h2 className="text-5xl font-bold">Les différentes plantes !</h2>
+        <div className="flex flex-col gap-12 items-start justify-start pt-10 pl-16 min-h-screen bg-[#6fbc29] text-white overflow-hidden">
+            <Background />
+            <Header />
+            <h2 className="text-5xl font-bold pt-16">Les différentes plantes !</h2>
             <Plants />
         </div>
     )

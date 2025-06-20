@@ -1,4 +1,6 @@
 import React from 'react';
+import Header from '@/components/Header';
+import Background from '@/components/Background';
 
 const starterTips = [
   {
@@ -92,11 +94,15 @@ const proTips = [
 
 export default function TipsShowcase() {
   return (
-    <section id="products" className="py-16 px-4">
-        <h1 className="text-5xl font-light mb-4 leading-tight">Tout type de conseils pour être un expert en verdure !</h1>
+
+                
+    <section id="products" className="min-h-screen bg-[#6fbc29] text-white overflow-hidden">
+                  <Background />
+                  <Header />
+        <h1 className="text-5xl font-light mt-28 ml-12 leading-tight">Tout type de conseils pour être un expert en verdure !</h1>
       <div className="max-w-6xl mx-auto">
         <div>
-            <h2 className="text-4xl font-normal mb-2 pt-12">Conseils pour les débutants du jardin</h2>
+            <h2 className="text-4xl font-normal mb-2 pt-12">Conseils pour les premières pousses</h2>
           {starterTips.map((starterTips) => (
             <div
               key={starterTips.id}
@@ -124,7 +130,7 @@ export default function TipsShowcase() {
             </div>
           ))}
 
-        <h2 className="text-4xl font-normal mb-2 pt-12">Conseils pour les rois du potager</h2>
+        <h2 className="text-4xl font-normal mb-2 pt-12">Conseils pour les rois du jardin</h2>
           {proTips.map((proTips) => (
             <div
               key={proTips.id}

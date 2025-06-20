@@ -10,7 +10,7 @@ export default function Hero() {
             Découvrez notre sélection unique de plantes succulentes
           </p>
           <button className="px-8 py-3 rounded-full bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 hover:bg-opacity-30 transition-all transform hover:-translate-y-1">
-            Découvrir
+            <a href="/Plants" className="hover:text-gray-200 transition-colors">Découvrir</a>
           </button>
         </div>
         <div className="relative">
