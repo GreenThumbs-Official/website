@@ -1,6 +1,6 @@
 import { createElement } from "react";
-import Header from '@/components/Header';
-import Background from '@/components/Background';
+import Header from '@/components/Nav/Header';
+import Background from '@/components/ui/background';
 
 function Plants(){
     
