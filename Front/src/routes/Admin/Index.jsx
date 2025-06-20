@@ -57,7 +57,7 @@ export default function AdminIndex() {
     <Sidebar>
       <AdminDashboard
         title="Gestion des Plantes"
-        description="Gérez votre inventaire de plantes, ajoutez de nouveaux produits et suivez les stocks."
+        description="Gérez votre inventaire de plantes, ajoutez de nouvelles plantes et suivez les."
         data={Data}
         columns={columns}
         buttonText="Ajouter une plante"

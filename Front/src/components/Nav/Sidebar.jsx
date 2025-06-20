@@ -17,7 +17,7 @@ export default function Sidebar ({ className, children, ...props }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-400 via-green-500 to-green-600 relative overflow-hidden">
+    <div className="min-h-screen bg-[#6fbc29] relative overflow-hidden">
       <Background />
       
       <div className="lg:hidden relative z-20 bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border-b border-white border-opacity-20">

@@ -30,7 +30,7 @@ export default function AdminDashboard ({
 
       <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-lg border border-white border-opacity-20 p-4 md:p-6">
         <div className="flex justify-between md:justify-end items-center mb-4">
-          <h2 className="text-lg font-semibold text-white md:hidden">Données</h2>
+          <h2 className="text-lg font-semibold text-white md:hidden">Plantes</h2>
           <button
             onClick={onButtonClick}
             className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium py-2 px-3 md:px-4 rounded-lg transition-all duration-200 border border-white border-opacity-30 text-sm md:text-base"
