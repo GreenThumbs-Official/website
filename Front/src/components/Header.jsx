@@ -8,7 +8,7 @@ export default function Header() {
           <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12,3.5L6,7.5V12.5L12,16.5L18,12.5V7.5L12,3.5M12,1L21,6V13L12,18L3,13V6L12,1Z" />
           </svg>
-          GreenThumbs
+          <a href="/" >GreenThumbs</a>
         </div>
         <div className="hidden md:flex gap-8">
           <a href="/" className="hover:text-gray-200 transition-colors">Accueil</a>
