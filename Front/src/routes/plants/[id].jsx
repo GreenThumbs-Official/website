@@ -5,7 +5,4 @@ export default function PlantDetailPage() {
             <h2 className="text-5xl font-bold">Page de la plante</h2>
         </div>
     )
-
-    
 }
-
