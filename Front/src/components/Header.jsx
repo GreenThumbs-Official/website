@@ -11,9 +11,9 @@ export default function Header() {
           GreenThumbs
         </div>
         <div className="hidden md:flex gap-8">
-          <a href="#home" className="hover:text-gray-200 transition-colors">Accueil</a>
-          <a href="#products" className="hover:text-gray-200 transition-colors">Produits</a>
-          <a href="#care" className="hover:text-gray-200 transition-colors">Tutoriels</a>
+          <a href="/" className="hover:text-gray-200 transition-colors">Accueil</a>
+          <a href="/Plants" className="hover:text-gray-200 transition-colors">Plantes</a>
+          <a href="/PlantsAdvices" className="hover:text-gray-200 transition-colors">Nos conseils</a>
           <a href="/contact" className="hover:text-gray-200 transition-colors">Contact</a>
         </div>
       </nav>
