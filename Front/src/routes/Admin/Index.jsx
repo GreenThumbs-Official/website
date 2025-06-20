@@ -8,22 +8,16 @@ export default function AdminIndex() {
       id: 1,
       name: 'Monstera Deliciosa',
       category: 'Plante d\'intérieur',
-      stock: 15,
-      status: 'En stock'
     },
     {
       id: 2,
       name: 'Ficus Benjamina',
       category: 'Plante d\'intérieur',
-      stock: 8,
-      status: 'En stock'
     },
     {
       id: 3,
       name: 'Cactus Barrel',
       category: 'Succulente',
-      stock: 0,
-      status: 'Rupture'
     }
   ];
 
@@ -39,29 +33,6 @@ export default function AdminIndex() {
     {
       header: 'Catégorie',
       accessor: 'category'
-    },
-    {
-      header: 'Prix',
-      accessor: 'price'
-    },
-    {
-      header: 'Stock',
-      accessor: 'stock'
-    },
-    {
-      header: 'Statut',
-      accessor: 'status',
-      cell: (row) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            row.status === 'En stock'
-              ? 'bg-green-500 bg-opacity-20 text-green-200'
-              : 'bg-red-500 bg-opacity-20 text-red-200'
-          }`}
-        >
-          {row.status}
-        </span>
-      )
     },
     {
       header: 'Actions',
