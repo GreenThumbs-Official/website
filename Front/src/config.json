@@ -1,0 +1,11 @@
+{
+  "api": {
+    "plants": "http://127.0.0.1:8000/api/plants",
+    "weather": {
+      "baseUrl": "https://api.tomorrow.io/v4/weather/forecast",
+      "apiKey": "ZKj5bwVVSdpMtzqha7CCQzsWJvCHZq3S",
+      "location": "45.750000,4.850000",
+      "timesteps": "1d"
+    }
+  }
+}

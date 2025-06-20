@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import config from '@/config.json';
 
-const API_KEY = 'ZKj5bwVVSdpMtzqha7CCQzsWJvCHZq3S';
-const LOCATION = '45.750000,4.850000'; // Lyon, France
-const API_URL = `https://api.tomorrow.io/v4/weather/forecast?location=${LOCATION}&timesteps=1d&apikey=${API_KEY}`;
+const { baseUrl, apiKey, location, timesteps } = config.api.weather;
+const API_URL = `${baseUrl}?location=${location}&timesteps=${timesteps}&apikey=${apiKey}`;
 
 export default function Weather() {
   const [weatherData, setWeatherData] = useState([]);
