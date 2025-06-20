@@ -1,6 +1,5 @@
 import React from 'react';
-import Sidebar from '@/components/Nav/Sidebar';
-import AdminDashboard from '@/components/AdminDashboard';
+import { UnifiedDashboard } from '@/components/Dashboard';
 
 export default function AdminIndex() {
   const Data = [
@@ -54,15 +53,14 @@ export default function AdminIndex() {
   };
 
   return (
-    <Sidebar>
-      <AdminDashboard
-        title="Gestion des Plantes"
-        description="Gérez votre inventaire de plantes, ajoutez de nouvelles plantes et suivez les."
-        data={Data}
-        columns={columns}
-        buttonText="Ajouter une plante"
-        onButtonClick={manageAddPlant}
-      />
-    </Sidebar>
+    <UnifiedDashboard
+      isAdmin={true}
+      title="Gestion des Plantes"
+      description="Gérez votre inventaire de plantes, ajoutez de nouvelles plantes et suivez les."
+      data={Data}
+      columns={columns}
+      buttonText="Ajouter une plante"
+      onButtonClick={manageAddPlant}
+    />
   );
 };

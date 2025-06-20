@@ -6,10 +6,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from './ui/table';
+} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import Sidebar from '@/components/Nav/Sidebar';
 
-export default function AdminDashboard ({
+export default function Dashboard({
+  userType = 'user', 
   title,
   description,
   data = [],
@@ -17,9 +19,10 @@ export default function AdminDashboard ({
   buttonText = 'Ajouter',
   onButtonClick,
   className,
+  showButton = true,
   ...props
 }) {
-  return (
+  const DashboardContent = () => (
     <div className={cn('space-y-4 md:space-y-6 p-4 md:p-0', className)} {...props}>
       <div className="space-y-2">
         <h1 className="text-2xl md:text-3xl font-bold text-white">{title}</h1>
@@ -29,15 +32,17 @@ export default function AdminDashboard ({
       </div>
 
       <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-lg border border-white border-opacity-20 p-4 md:p-6">
-        <div className="flex justify-between md:justify-end items-center mb-4">
-          <h2 className="text-lg font-semibold text-white md:hidden">Plantes</h2>
-          <button
-            onClick={onButtonClick}
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium py-2 px-3 md:px-4 rounded-lg transition-all duration-200 border border-white border-opacity-30 text-sm md:text-base"
-          >
-            {buttonText}
-          </button>
-        </div>
+        {showButton && (
+          <div className="flex justify-between md:justify-end items-center mb-4">
+            <h2 className="text-lg font-semibold text-white md:hidden">Données</h2>
+            <button
+              onClick={onButtonClick}
+              className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium py-2 px-3 md:px-4 rounded-lg transition-all duration-200 border border-white border-opacity-30 text-sm md:text-base"
+            >
+              {buttonText}
+            </button>
+          </div>
+        )}
 
         <div className="hidden md:block bg-white bg-opacity-20 rounded-lg overflow-hidden">
           <Table>
@@ -109,4 +114,17 @@ export default function AdminDashboard ({
       </div>
     </div>
   );
-};
+
+  return (
+    <Sidebar userType={userType}>
+      <DashboardContent />
+    </Sidebar>
+  );
+}
+
+export function UnifiedDashboard({ isAdmin = false, ...props }) {
+  if (isAdmin) {
+    return <Dashboard userType="admin" {...props} />;
+  }
+  return <Dashboard userType="user" showButton={true} {...props} />;
+}

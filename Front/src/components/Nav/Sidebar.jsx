@@ -2,15 +2,25 @@ import React, { useState } from 'react';
 import Background from '../Background';
 import { cn } from '@/lib/utils';
 
-export default function Sidebar ({ className, children, ...props }) {
+export default function Sidebar ({ className, children, userType = 'user', ...props }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  const menuItems = [
+  const adminMenuItems = [
     { label: 'Dashboard', href: '/admin', icon: '📊' },
     { label: 'Plantes', href: '/admin/plants', icon: '🌱' },
     { label: 'Utilisateurs', href: '/admin/users', icon: '👥' },
     { label: 'Paramètres', href: '/admin/settings', icon: '⚙️' },
   ];
+
+  const userMenuItems = [
+    { label: 'Ma Collection', href: '/dashboard', icon: '🌿' },
+    { label: 'Calendrier d\'arrosage', href: '/watering', icon: '💧' },
+    { label: 'Guide de soins', href: '/care-guide', icon: '📖' },
+    { label: 'Mon Profil', href: '/profile', icon: '👤' },
+  ];
+
+  const menuItems = userType === 'admin' ? adminMenuItems : userMenuItems;
+  const appTitle = userType === 'admin' ? 'GreenThumbs Admin' : 'GreenThumbs';
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -26,7 +36,7 @@ export default function Sidebar ({ className, children, ...props }) {
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12,3.5L6,7.5V12.5L12,16.5L18,12.5V7.5L12,3.5M12,1L21,6V13L12,18L3,13V6L12,1Z" />
             </svg>
-            GreenThumbs
+            {appTitle}
           </div>
           <button
             onClick={toggleMobileMenu}
@@ -51,7 +61,7 @@ export default function Sidebar ({ className, children, ...props }) {
                 <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12,3.5L6,7.5V12.5L12,16.5L18,12.5V7.5L12,3.5M12,1L21,6V13L12,18L3,13V6L12,1Z" />
                 </svg>
-                GreenThumbs Admin
+                {appTitle}
               </div>
               <nav className="space-y-2">
                 {menuItems.map((item, index) => (
@@ -78,7 +88,7 @@ export default function Sidebar ({ className, children, ...props }) {
               <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12,3.5L6,7.5V12.5L12,16.5L18,12.5V7.5L12,3.5M12,1L21,6V13L12,18L3,13V6L12,1Z" />
               </svg>
-              GreenThumbs Admin
+              {appTitle}
             </div>
             <nav className="space-y-2">
               {menuItems.map((item, index) => (
