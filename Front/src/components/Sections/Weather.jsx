@@ -108,20 +108,20 @@ export default function Weather() {
                 
                 <div className="space-y-2 text-sm text-gray-600">
                   <div className="flex">
-                    <span className='mx-2'>Min:</span>
-                    <span className="font-medium">
+                    <span className='mx-2 text-white'>Min:</span>
+                    <span className="font-medium text-white">
                       {formatTemperature(meteo.values.temperatureMin)}
                     </span>
                   </div>
                   <div className="flex">
-                    <span className='mx-2'>Max:</span>
-                    <span className="font-medium">
+                    <span className='mx-2 text-white'>Max:</span>
+                    <span className="font-medium text-white">
                       {formatTemperature(meteo.values.temperatureMax)}
                     </span>
                   </div>
                   <div>
-                    <span>Action recommendée:</span>
-                    <span className="font-medium">
+                    <span className='text-white'>Action recommendée : </span>
+                    <span className="font-medium text-white">
                       {meteo.values.temperatureMax < 10 
                         ? 'Risque de froid, pensez à protéger vos plantes'
                         : meteo.values.temperatureMax > 28 
