@@ -108,13 +108,13 @@ export default function Weather() {
                 
                 <div className="space-y-2 text-sm text-gray-600">
                   <div className="flex justify-between">
-                    <span>Min:</span>
+                    <span className='mx-2'>Min:</span>
                     <span className="font-medium">
                       {formatTemperature(meteo.values.temperatureMin)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Max:</span>
+                    <span className='mx-2'>Max:</span>
                     <span className="font-medium">
                       {formatTemperature(meteo.values.temperatureMax)}
                     </span>
