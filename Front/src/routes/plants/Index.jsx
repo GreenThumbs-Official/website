@@ -73,13 +73,13 @@ function Plants() {
         >
           <div className="text-center">
             <h3 className="text-xl font-semibold text-white mb-4">
-              {plant.name}
+              {plant.common_name}
             </h3>
             
             {plant.image_url && (
               <img 
                 src={plant.image_url} 
-                alt={plant.name}
+                alt={plant.common_name}
                 className="w-full h-48 object-cover rounded-lg mb-4"
                 onError={(e) => {
                   e.target.style.display = 'none';
@@ -88,7 +88,7 @@ function Plants() {
             )}
             
             <a 
-              href={`PlantDetails/${plant.id}`}
+              href={`plants/${plant.id}`}
               className="inline-block bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
             >
               Voir les détails de la plante
