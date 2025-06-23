@@ -122,7 +122,6 @@ export default function Weather() {
                   <div>
                     <span>Action recommendée:</span>
                     <span className="font-medium">
-                      //faire une condition pour afficher une action recommandée en faisant une moyenne entre la température min et max
                       {meteo.values.temperatureMax < 10 
                         ? 'Risque de froid, pensez à protéger vos plantes'
                         : meteo.values.temperatureMax > 28 
