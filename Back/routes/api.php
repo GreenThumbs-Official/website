@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\IntrestController;
 use App\Http\Controllers\PlantController;
 use Illuminate\Http\Request;
@@ -34,6 +35,8 @@ Route::middleware(['auth:sanctum', 'can:isAdmin'])->group(function () {
     Route::put('/plants/{plant}', [PlantController::class, 'update']);
     Route::delete('/plants/{plant}', [PlantController::class, 'destroy']);
 });
+
+Route::post('/handle-prompt', [GeminiController::class, 'handlePrompt']);
 
 
 
