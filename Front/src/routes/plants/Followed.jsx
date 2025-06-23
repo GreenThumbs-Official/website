@@ -6,7 +6,7 @@ function Generate(){
 
     async function generateWithAPI() {
 
-        const reponse = await fetch("GET https://perenual.com/api/v2/species-list?key=");
+        const reponse = await fetch("https://perenual.com/api/v2/species-list?key=sk-7dPj68555c3d615a211096");
         const plants = await reponse.json();
 
         plants.data.forEach((plant) =>{
@@ -19,9 +19,9 @@ function Generate(){
 
             const plantSection = document.querySelector('.classPlantsFollow')
  
-            plantName.textContent = plant.name
+            plantName.textContent = plant.common_name
             plantImg.setAttribute('src', plant.image_url)
-            plantLink.setAttribute('href', "PlantDetails/" + plant.id)
+            plantLink.setAttribute('href', plant.id)
             plantLink.textContent = "Voir les détails de la plante"
             console.log(plantImg)
             console.log(plantName);
