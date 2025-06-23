@@ -2,13 +2,13 @@ import React from 'react';
 
 const filter = [
   {
-    title: 'date de plantation',
+    title: 'harvest_season',
   },
   {
-    title: 'date de floraison',
+    title: 'flowering_season',
   },
   {
-    title: 'date de recolte',
+    title: 'fruiting_season',
   },
 ];
 
