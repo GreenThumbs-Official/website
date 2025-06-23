@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\IntrestController;
 use App\Http\Controllers\PlantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,11 +25,17 @@ Route::middleware('auth:sanctum')->get('/user-profile', function (Request $reque
  * Default route used to get all plants
  */
 Route::get('/plants', [PlantController::class, 'index']);
+
+Route::get('/intrests', [IntrestController::class, 'index']);
+
+Route::get('/favorites', [FavoriteController::class, 'index']);
 Route::middleware(['auth:sanctum', 'can:isAdmin'])->group(function () {
     Route::post('/plants', [PlantController::class, 'store']);
     Route::put('/plants/{plant}', [PlantController::class, 'update']);
     Route::delete('/plants/{plant}', [PlantController::class, 'destroy']);
 });
+
+
 
 
 /**

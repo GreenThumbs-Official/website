@@ -18,9 +18,14 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'user'])->default('user');
+            $table->string('ville');
+            $table->string('pays');
             $table->rememberToken();
             $table->timestamps();
         });
+
+
+
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->ulid('id')->primary();
@@ -38,6 +43,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('user_favorite');
+        Schema::dropIfExists('user_intrest');
         Schema::dropIfExists('sessions');
     }
 };
