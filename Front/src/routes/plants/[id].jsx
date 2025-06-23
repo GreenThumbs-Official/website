@@ -9,7 +9,7 @@ function Details(){
     async function generatePlantDetail() {
         const { id } = useParams();
 
-        const reponse = await fetch(`https://perenual.com/api/v2/species/details/${id}?key=sk-7dPj68555c3d615a211096`);
+        const reponse = await fetch(`https://perenual.com/api/v2/species/details/${id}?key=sk-bnAq6859557a5edb311135`);
         const plants = await reponse.json();
 
             let plantStock = document.createElement('div');
@@ -26,9 +26,7 @@ function Details(){
 
             let maxVal = parseInt(plants.dimensions[0].max_value) * 0.304 + "m"
             sizeMax.textContent = "Taille maximale de la plante " + maxVal
-            let minVal = parseInt(plants.dimensions[0].min_value) * 0.304 + "m"
-            sizeMin.textContent = "Taille minimale de la plante " + minVal
-
+            
             plantSection.appendChild(plantName)
             plantSection.appendChild(plantImg)        
             plantStock.appendChild(sizeMin)
