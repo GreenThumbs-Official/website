@@ -86,7 +86,7 @@ export default function Weather() {
     <section className="py-16 px-4">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-12 text-white">
-          Lorem Ipsum
+          Meteo
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -107,14 +107,14 @@ export default function Weather() {
                 </div>
                 
                 <div className="space-y-2 text-sm text-gray-600">
-                  <div className="flex justify-between">
-                    <span>Min:</span>
+                  <div className="flex">
+                    <span className='mx-2'>Min:</span>
                     <span className="font-medium">
                       {formatTemperature(meteo.values.temperatureMin)}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Max:</span>
+                  <div className="flex">
+                    <span className='mx-2'>Max:</span>
                     <span className="font-medium">
                       {formatTemperature(meteo.values.temperatureMax)}
                     </span>
