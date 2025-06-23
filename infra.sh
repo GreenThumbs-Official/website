@@ -2,6 +2,8 @@
 
 case "$1" in
   up)
+    cd ./Front && npm install
+    cd ..
     docker compose up -d --build
     docker compose exec backend composer install
     docker compose exec backend cp ./.env.example ./.env

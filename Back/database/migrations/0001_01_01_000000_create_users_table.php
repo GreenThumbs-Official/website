@@ -24,15 +24,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('user_intrest', function (Blueprint $table) {
-            $table->ulid('user_id');
-            $table->ulid('intrest_id');
-        });
 
-        Schema::create('user_favorite', function (Blueprint $table) {
-            $table->ulid('user_id');
-            $table->ulid('favorite_id');
-        });
 
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -51,6 +43,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('user_favorite');
+        Schema::dropIfExists('user_intrest');
         Schema::dropIfExists('sessions');
     }
 };
