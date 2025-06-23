@@ -7,18 +7,19 @@ function Details(){
 
     async function generatePlantDetail() {
 
-        const reponse = await fetch("https://perenual.com/api/v2/species/details/${plant.id}?key=sk-7dPj68555c3d615a211096");
+        const reponse = await fetch("https://perenual.com/api/v2/species/details/[ID]?key=sk-7dPj68555c3d615a211096");
         const plants = await reponse.json();
 
-        plants.data.forEach((plant) =>{
             let plantStock = document.createElement('div');
             let plantName = document.createElement('h3');
             let plantImg = document.createElement('img');
 
+
             const plantSection = document.querySelector('.classPlantsFollow')
  
-            plantName.textContent = plant.common_name
-            plantImg.setAttribute('src', plant.image_url)
+            plantName.textContent = plants.common_name
+            plantImg.setAttribute('src', plants.image_url)
+            plantLink.setAttribute('href', plants.id)
             console.log(plantImg)
             console.log(plantName);
 
@@ -26,7 +27,7 @@ function Details(){
             plantStock.appendChild(plantImg)
             console.log(plantSection)            
             plantSection.appendChild(plantStock)
-        })
+
     }
     generatePlantDetail()
         
