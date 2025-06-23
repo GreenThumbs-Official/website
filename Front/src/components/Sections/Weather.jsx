@@ -119,8 +119,21 @@ export default function Weather() {
                       {formatTemperature(meteo.values.temperatureMax)}
                     </span>
                   </div>
+                  <div>
+                    <span>Action recommendée:</span>
+                    <span className="font-medium">
+                      //faire une condition pour afficher une action recommandée en faisant une moyenne entre la température min et max
+                      {meteo.values.temperatureMax < 10 
+                        ? 'Risque de froid, pensez à protéger vos plantes'
+                        : meteo.values.temperatureMax > 28 
+                        ? 'Risque de chaleur, pensez à arroser ou ombrager vos plantes'
+                        : meteo.values.temperatureMax >= 10 && meteo.values.temperatureMax <= 28
+                        ? 'Conditions idéales pour vos plantes'
+                        : 'Aucune action recommandée'}
+                    </span>
+                  </div>
                   {meteo.values.humidity && (
-                    <div className="flex justify-between">
+                    <div className="flex ">
                       <span>Humidité:</span>
                       <span className="font-medium">
                         {Math.round(meteo.values.humidity)}%
