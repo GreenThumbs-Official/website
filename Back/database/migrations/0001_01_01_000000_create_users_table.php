@@ -18,9 +18,22 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'user'])->default('user');
+            $table->string('ville');
+            $table->string('pays');
             $table->rememberToken();
             $table->timestamps();
         });
+
+        Schema::create('user_intrest', function (Blueprint $table) {
+            $table->ulid('user_id');
+            $table->ulid('intrest_id');
+        });
+
+        Schema::create('user_favorite', function (Blueprint $table) {
+            $table->ulid('user_id');
+            $table->ulid('favorite_id');
+        });
+
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->ulid('id')->primary();
