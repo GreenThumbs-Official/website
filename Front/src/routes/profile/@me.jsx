@@ -115,7 +115,7 @@ export default function ProfileMe() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen  bg-[#6fbc29] text-white overflow-hidden">
       <Background />
       <Header />
       
