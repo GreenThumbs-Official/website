@@ -14,7 +14,6 @@ function Details(){
 
             let plantStock = document.createElement('div');
             let plantName = document.createElement('h3');
-            let plantDescription = document.createElement('p');
             let plantImg = document.createElement('img');
             let sizeMax = document.createElement('p');
             let sizeMin = document.createElement('p');
@@ -39,10 +38,7 @@ function Details(){
             plantSection.appendChild(plantImg)  
             plantSection.appendChild(plantDescription)      
             plantStock.appendChild(sizeMax)
-<<<<<<< HEAD
-=======
             plantStock.appendChild(plantDescription)
->>>>>>> emir
             plantStock.appendChild(plantOrigin)
             plantSection.appendChild(plantStock)
 
