@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Nav/Header';
 import Background from '@/components/ui/background';
+import PlantFilter from '@/components/Sections/PlantFilter';
 import config from '@/config.json';
 
 const API_URL = config.api.plants;
@@ -106,6 +107,7 @@ export default function PlantsPage() {
         <div className="flex flex-col gap-12 items-start justify-start pt-10 pl-16 min-h-screen bg-[#6fbc29] text-white overflow-hidden">
             <Background />
             <Header />
+            {/* <PlantFilter /> */}
             <h2 className="text-5xl font-light mt-28 ml-12 leading-tight">Les différentes plantes !</h2>
             <Plants />
         </div>
