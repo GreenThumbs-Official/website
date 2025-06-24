@@ -14,23 +14,30 @@ function Details(){
 
             let plantStock = document.createElement('div');
             let plantName = document.createElement('h3');
+            let plantDescription = document.createElement('p');
             let plantImg = document.createElement('img');
             let sizeMax = document.createElement('p');
-            let sizeMin = document.createElement('p');
+            let plantOrigin = document.createElement('p');
 
 
             const plantSection = document.querySelector('.classPlantsFollow')
- 
+        
+            plantDescription.textContent = plants.description
+            plantOrigin.textContent = plants.origin[0];
+
+
             plantName.textContent = plants.common_name
             plantImg.setAttribute('src', plants.image_url)
 
             let maxVal = parseInt(plants.dimensions[0].max_value) * 0.304 + "m"
-            sizeMax.textContent = "Taille maximale de la plante " + maxVal
+            sizeMax.textContent = "Taille maximale de la plante : " + maxVal
             
             plantSection.appendChild(plantName)
-            plantSection.appendChild(plantImg)        
-            plantStock.appendChild(sizeMin)
+            plantSection.appendChild(plantImg)  
+            plantSection.appendChild(plantDescription)      
             plantStock.appendChild(sizeMax)
+            plantStock.appendChild(plantOrigin)
+            plantSection.appendChild(plantStock)
 
     }
     generatePlantDetail()
