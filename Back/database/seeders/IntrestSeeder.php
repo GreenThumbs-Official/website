@@ -13,23 +13,31 @@ class IntrestSeeder extends Seeder
      */
     public function run(): void
     {
+        Intrest::query()->delete();
+        
         Intrest::create([
-            'name' => 'Gardening',
+            'name' => 'Plantes d\'intérieur',
         ]);
         Intrest::create([
-            'name' => 'Botany',
+            'name' => 'Plantes d\'extérieur',
         ]);
         Intrest::create([
-            'name' => 'Horticulture',
+            'name' => 'Succulentes',
         ]);
         Intrest::create([
-            'name' => 'Plant Care',
+            'name' => 'Fleurs',
         ]);
         Intrest::create([
-            'name' => 'Sustainable Gardening',
+            'name' => 'Légumes',
         ]);
         Intrest::create([
-            'name' => 'Organic Gardening',
+            'name' => 'Fruits',
+        ]);
+        Intrest::create([
+            'name' => 'Herbes aromatiques',
+        ]);
+        Intrest::create([
+            'name' => 'Plantes exotiques',
         ]);
     }
 }
