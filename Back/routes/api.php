@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
  * Default route used to get all plants
  */
 Route::get('/plants', [PlantController::class, 'index']);
+Route::get('/plants/{plant}', [PlantController::class, 'show']);
 
 Route::get('/intrests', [IntrestController::class, 'index']);
 

@@ -22,7 +22,8 @@ class GeminiController extends Controller
      *     "instructions": "respond in this format: {capital: 'Paris'}"
      * }
      */
-    public function handlePrompt(Request $request) {
+    public function handlePrompt(Request $request)
+    {
         $request->validate([
             'prompt' => 'required|max:1000',
             'instructions' => 'nullable|max:2000',
@@ -32,7 +33,7 @@ class GeminiController extends Controller
 
         switch ($request->response_syntax) {
             case 'json':
-                $response_syntax = 'strictly raw json syntax, strictly no markdown at all';
+                $response_syntax = 'strictly raw json syntax, strictly no markdown or any other formatting is allowed in the response, every thing has to be valid for json_decode() in PHP to work, no comments, no markdown, no code blocks, just raw json';
                 break;
             case 'text':
                 $response_syntax = 'strictly raw text syntax';
@@ -47,20 +48,29 @@ class GeminiController extends Controller
             "response_format" => $request->response_format ?? 'no example format provided',
         ];
 
-        $client = new Client("AIzaSyAhiPKbhHp7O6NuuQwbClxyZj0V8f2TLZk");
+        $client = new Client("AIzaSyCYl6E40mBmhP-gg4tjeJ6u6cKfqPFV2sQ");
 
-        $generationConfig = (new GenerationConfig())->withTemperature(0.5);
+        $generationConfig = (new GenerationConfig())->withTemperature(0.1);
 
         $response = $client->withV1BetaVersion()
-            ->generativeModel(ModelName::GEMINI_1_5_FLASH_LATEST)
+            ->generativeModel(ModelName::GEMINI_1_5_FLASH)
             ->withGenerationConfig($generationConfig)
             ->withSystemInstruction(json_encode($instruction) ?? 'You are a helpful assistant.')
-
             ->generateContent(new TextPart($request->prompt),
-        );
+            );
+        $raw = $response->text();
+        // Supprime les balises ```json et ```
+        $clean = preg_replace('/^```json\s*|\s*```$/', '', trim($raw));
+        // Correction des échappements dans les classes Tailwind
+        $clean = str_replace('\\/', '/', $clean);
+        // Décodage JSON
+        $data = json_decode($clean);
 
         return response()->json([
-            'response' => $response->text(),
+            'prompt' => $request->prompt,
+            'response' => $data,
+            'raw_response' => $raw,
+            'clean_response' => $clean
         ]);
     }
 }
