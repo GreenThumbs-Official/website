@@ -1,12 +1,12 @@
-import { createElement } from "react";
-import Header from '@/components/Header';
-import Background from '@/components/Background';
+import React from 'react';
+import Header from '@/components/Nav/Header';
+import Background from '@/components/ui/Background';
 
-function Plants(){
-    
-    async function afficherPlants() {
+function Generate(){
 
-        const reponse = await fetch("http://127.0.0.1:8000/api/plants");
+    async function generateWithAPI() {
+
+        const reponse = await fetch("https://perenual.com/api/v2/species-list?key=sk-7dPj68555c3d615a211096");
         const plants = await reponse.json();
 
         plants.data.forEach((plant) =>{
@@ -17,11 +17,11 @@ function Plants(){
             let buttonView = document.createElement('button');
 
 
-            const plantSection = document.querySelector('.classPlants')
+            const plantSection = document.querySelector('.classPlantsFollow')
  
-            plantName.textContent = plant.name
+            plantName.textContent = plant.common_name
             plantImg.setAttribute('src', plant.image_url)
-            plantLink.setAttribute('href', "PlantDetails/" + plant.id)
+            plantLink.setAttribute('href', plant.id)
             plantLink.textContent = "Voir les détails de la plante"
             console.log(plantImg)
             console.log(plantName);
@@ -34,26 +34,24 @@ function Plants(){
             plantSection.appendChild(plantStock)
         })
     }
-    afficherPlants()
-
+    generateWithAPI()
+        
     return (
-        <section className="classPlants grid grid-cols-3 gap-20">
+        <section className="classPlantsFollow grid grid-cols-3 gap-20">
 
         </section>
     )
+
 }
 
-export default function PlantsPage() {
-
+export default function PlantsFollowed() {
     return (
-        <div className="flex flex-col gap-12 items-start justify-start pt-10 pl-16 min-h-screen bg-[#6fbc29] text-white overflow-hidden">
+        <div className="min-h-screen bg-[#6fbc29] text-white overflow-hidden">
             <Background />
             <Header />
-            <h2 className="text-5xl font-bold pt-16">Les différentes plantes !</h2>
-            <Plants />
+
+            <h1 className="text-5xl font-light mt-28 ml-12 leading-tight">Vos plantes suivies</h1>
+            <Generate />
         </div>
-    )
-
-
+    );
 }
-

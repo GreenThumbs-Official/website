@@ -3,15 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import Header from "@/components/Header";
-import Background from "@/components/Background";
-import { useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
-
+import Header from "@/components/Nav/Header";
+import Background from "@/components/ui/background";
 
 export default function CreatePlant() {
-    const navigate = useNavigate();
-
     const manageSubmit = (e) => {
         e.preventDefault();
         console.log("Plant created");

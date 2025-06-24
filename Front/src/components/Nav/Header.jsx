@@ -12,8 +12,8 @@ export default function Header() {
         </div>
         <div className="hidden md:flex gap-8">
           <a href="/" className="hover:text-gray-200 transition-colors">Accueil</a>
-          <a href="/Plants" className="hover:text-gray-200 transition-colors">Plantes</a>
-          <a href="/PlantsAdvices" className="hover:text-gray-200 transition-colors">Nos conseils</a>
+          <a href="/plants" className="hover:text-gray-200 transition-colors">Plantes</a>
+          <a href="/plants/advices" className="hover:text-gray-200 transition-colors">Nos conseils</a>
           <a href="/contact" className="hover:text-gray-200 transition-colors">Contact</a>
         </div>
       </nav>

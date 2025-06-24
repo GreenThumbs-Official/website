@@ -1,10 +1,10 @@
 import React from 'react';
-import Header from '@/components/Header';
-import Hero from '@/components/Hero';
-import Weather from '@/components/Weather';
-import ProductShowcase from '@/components/ProductShowcase';
-import CareGuide from '@/components/CareGuide';
-import Background from '@/components/Background';
+import Header from '@/components/Nav/Header';
+import Hero from '@/components/Sections/Hero';
+import Weather from '@/components/Sections/Weather';
+import ProductShowcase from '@/components/Sections/ProductShowcase';
+import CareGuide from '@/components/Sections/CareGuide';
+import Background from '@/components/ui/background';
 
 export default function Home() {
     return (
