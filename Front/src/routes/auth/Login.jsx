@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
 import { Label } from '@/components/ui/label';
 import {
   Form,
@@ -31,6 +32,8 @@ export default function Login() {
     },
   });
 
+  const navigate = useNavigate();
+
   const onSubmit = async (data) => {
     try {
       const response = await fetch('http://127.0.0.1:8000/api/login', {
@@ -47,6 +50,12 @@ export default function Login() {
         localStorage.setItem('access_token', result.access_token);
         localStorage.setItem('user', JSON.stringify(result.user));
         console.log('Connexion réussie:', result);
+        
+        if (!result.onboarding_completed) {
+          navigate('/profile/onboarding');
+        } else {
+          navigate('/dash/user');
+        }
       } else {
         console.error('Erreur de connexion:', result.message);
       }

@@ -18,8 +18,12 @@ Route::post('/login', [AuthController::class, 'login']);
 /**
  * Test route for API tokens
  */
-Route::middleware('auth:sanctum')->get('/user-profile', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user-profile', function (Request $request) {
+        return $request->user();
+    });
+    Route::post('/complete-onboarding', [AuthController::class, 'completeOnboarding']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
 });
 
 /**

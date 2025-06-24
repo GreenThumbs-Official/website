@@ -1,7 +1,9 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 
-const plantOptions = [
+const defaultPlantImage = 'https://images.unsplash.com/photo-1632207691143-7ee8c82f6e9f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80';
+
+const defaultPlantOptions = [
   { id: 'monstera', name: 'Monstera Deliciosa', image: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80' },
   { id: 'ficus', name: 'Ficus Lyrata', image: 'https://images.unsplash.com/photo-1616690710400-a16d146927c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80' },
   { id: 'pothos', name: 'Pothos Doré', image: 'https://images.unsplash.com/photo-1622398925373-3f91b1e275f5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80' },
@@ -10,7 +12,13 @@ const plantOptions = [
   { id: 'zz', name: 'Plante ZZ', image: 'https://images.unsplash.com/photo-1632207691143-7ee8c82f6e9f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80' },
 ];
 
-export default function Step3Plants({ onNext, onPrevious, formData, setFormData, onComplete }) {
+export default function Step3Plants({ onNext, onPrevious, formData, setFormData, onComplete, plantOptions = [] }) {
+  const displayPlants = plantOptions.length > 0 ? 
+    plantOptions.map(plant => ({
+      id: plant.id,
+      name: plant.name,
+      image: plant.image || defaultPlantImage
+    })) : defaultPlantOptions;
   const togglePlant = (plantId) => {
     setFormData(prev => {
       const currentPlants = prev.favoritePlants || [];
@@ -37,7 +45,7 @@ export default function Step3Plants({ onNext, onPrevious, formData, setFormData,
       
       <form onSubmit={manageSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
-          {plantOptions.map((plant) => {
+          {displayPlants.map((plant) => {
             const isSelected = (formData.favoritePlants || []).includes(plant.id);
             return (
               <div 

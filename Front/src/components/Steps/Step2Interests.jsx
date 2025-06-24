@@ -1,18 +1,34 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 
-const interestOptions = [
-  { id: 'indoor', icon: '🏠', label: 'Plantes d\'intérieur' },
-  { id: 'outdoor', icon: '🌳', label: 'Plantes d\'extérieur' },
-  { id: 'succulents', icon: '🌵', label: 'Succulentes' },
-  { id: 'flowers', icon: '🌸', label: 'Fleurs' },
-  { id: 'vegetables', icon: '🥬', label: 'Légumes' },
-  { id: 'fruits', icon: '🍎', label: 'Fruits' },
-  { id: 'herbs', icon: '🌿', label: 'Herbes aromatiques' },
-  { id: 'exotic', icon: '🌴', label: 'Plantes exotiques' },
-];
+const interestIcons = {
+  'indoor': '🏠',
+  'outdoor': '🌳',
+  'succulents': '🌵',
+  'flowers': '🌸',
+  'vegetables': '🥬',
+  'fruits': '🍎',
+  'herbs': '🌿',
+  'exotic': '🌴',
+  'default': '🌱' 
+};
 
-export default function Step2Interests({ onNext, onPrevious, formData, setFormData }) {
+export default function Step2Interests({ onNext, onPrevious, formData, setFormData, interestOptions = [] }) {
+  const displayOptions = interestOptions.length > 0 ? 
+    interestOptions.map(interest => ({
+      id: interest.id,
+      icon: interestIcons[interest.name.toLowerCase()] || interestIcons.default,
+      label: interest.name
+    })) : [
+      { id: 'indoor', icon: '🏠', label: 'Plantes d\'intérieur' },
+      { id: 'outdoor', icon: '🌳', label: 'Plantes d\'extérieur' },
+      { id: 'succulents', icon: '🌵', label: 'Succulentes' },
+      { id: 'flowers', icon: '🌸', label: 'Fleurs' },
+      { id: 'vegetables', icon: '🥬', label: 'Légumes' },
+      { id: 'fruits', icon: '🍎', label: 'Fruits' },
+      { id: 'herbs', icon: '🌿', label: 'Herbes aromatiques' },
+      { id: 'exotic', icon: '🌴', label: 'Plantes exotiques' },
+    ];
   const toggleInterest = (interestId) => {
     setFormData(prev => {
       const currentInterests = prev.interests || [];
@@ -39,7 +55,7 @@ export default function Step2Interests({ onNext, onPrevious, formData, setFormDa
       
       <form onSubmit={manageSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-3">
-          {interestOptions.map((option) => {
+          {displayOptions.map((option) => {
             const isSelected = (formData.interests || []).includes(option.id);
             return (
               <button
