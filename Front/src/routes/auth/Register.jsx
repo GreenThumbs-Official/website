@@ -23,8 +23,6 @@ const registerSchema = z.object({
   email: z.string().email('Adresse email invalide'),
   password: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
   confirmPassword: z.string().min(8, 'Veuillez confirmer votre mot de passe'),
-  ville: z.string().min(2, 'La ville est requise'),
-  pays: z.string().min(2, 'Le pays est requis'),
   role: z.enum(['user', 'admin']).optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Les mots de passe ne correspondent pas',
@@ -40,8 +38,6 @@ export default function Register() {
       email: '',
       password: '',
       confirmPassword: '',
-      ville: '',
-      pays: '',
       role: 'user',
     },
   });
@@ -51,7 +47,7 @@ export default function Register() {
   const nextStep = async () => {
     let fieldsToValidate = [];
     if (step === 1) fieldsToValidate = ['username', 'email'];
-    if (step === 2) fieldsToValidate = ['ville', 'pays'];
+    if (step === 2) fieldsToValidate = [];
     const valid = await form.trigger(fieldsToValidate);
     if (valid) setStep(step + 1);
   };
@@ -139,46 +135,6 @@ export default function Register() {
                 <>
                   <FormField
                     control={form.control}
-                    name="ville"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white font-medium">Ville</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="Votre ville"
-                            className="bg-white bg-opacity-90 border-white border-opacity-30 text-gray-900 placeholder:text-gray-500"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-300" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="pays"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white font-medium">Pays</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="Votre pays"
-                            className="bg-white bg-opacity-90 border-white border-opacity-30 text-gray-900 placeholder:text-gray-500"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-300" />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-              {step === 3 && (
-                <>
-                  <FormField
-                    control={form.control}
                     name="password"
                     render={({ field }) => (
                       <FormItem>
@@ -238,10 +194,10 @@ export default function Register() {
                 {step > 1 && (
                   <Button type="button" onClick={prevStep} className="bg-gray-500 hover:bg-gray-600">Précédent</Button>
                 )}
-                {step < 3 && (
+                {step < 2 && (
                   <Button type="button" onClick={nextStep} className="ml-auto">Suivant</Button>
                 )}
-                {step === 3 && (
+                {step === 2 && (
                   <Button type="submit" className="ml-auto">S'inscrire</Button>
                 )}
               </div>

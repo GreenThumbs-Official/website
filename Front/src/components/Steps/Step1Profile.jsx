@@ -25,43 +25,30 @@ export default function Step1Profile({ onNext, formData, setFormData }) {
       <h2 className="text-2xl font-bold mb-6 text-white text-center">Vos informations</h2>
       <form onSubmit={manageSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-white font-medium">Nom</Label>
+          <Label htmlFor="ville" className="text-white font-medium">Ville</Label>
           <Input
             type="text"
-            id="name"
-            name="name"
-            value={formData.profile?.name || ''}
-            onChange={manageChange}
-            placeholder="Votre nom"
-            className="bg-white bg-opacity-90 border-white border-opacity-30 text-gray-900 placeholder:text-gray-500"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-white font-medium">Email</Label>
-          <Input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.profile?.email || ''}
-            onChange={manageChange}
-            placeholder="votre@email.com"
-            className="bg-white bg-opacity-90 border-white border-opacity-30 text-gray-900 placeholder:text-gray-500"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="location" className="text-white font-medium">Localisation</Label>
-          <Input
-            type="text"
-            id="location"
-            name="location"
-            value={formData.profile?.location || ''}
+            id="ville"
+            name="ville"
+            value={formData.profile?.ville || ''}
             onChange={manageChange}
             placeholder="Votre ville"
             className="bg-white bg-opacity-90 border-white border-opacity-30 text-gray-900 placeholder:text-gray-500"
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="pays" className="text-white font-medium">Pays</Label>
+          <Input
+            type="text"
+            id="pays"
+            name="pays"
+            value={formData.profile?.pays || ''}
+            onChange={manageChange}
+            placeholder="Votre pays"
+            className="bg-white bg-opacity-90 border-white border-opacity-30 text-gray-900 placeholder:text-gray-500"
+            required
           />
         </div>
 
