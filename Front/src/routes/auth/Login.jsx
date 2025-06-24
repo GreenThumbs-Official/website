@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom';
 
 const loginSchema = z.object({
   email: z.string().email('Adresse email invalide'),
-  password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
+  password: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
 });
 
 export default function Login() {
@@ -44,7 +44,7 @@ export default function Login() {
       const result = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('token', result.access_token);
+        localStorage.setItem('access_token', result.access_token);
         localStorage.setItem('user', JSON.stringify(result.user));
         console.log('Connexion réussie:', result);
       } else {

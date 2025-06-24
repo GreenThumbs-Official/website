@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from '@/components/Nav/Header';
-import Background from '@/components/ui/Background';
+import Background from '@/components/ui/background';
 
 function Generate(){
 
