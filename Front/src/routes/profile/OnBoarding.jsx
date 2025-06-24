@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Background from '@/components/ui/background';
 import Step1Profile from '@/components/Steps/Step1Profile';
@@ -7,6 +7,13 @@ import Step3Plants from '@/components/Steps/Step3Plants';
 
 export default function OnBoarding() {
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      navigate('/auth/login');
+    }
+  }, [navigate]);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     profile: {},
