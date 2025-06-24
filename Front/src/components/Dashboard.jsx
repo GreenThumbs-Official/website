@@ -128,6 +128,76 @@ export function UnifiedDashboard({ isAdmin, ...props }) {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        navigate('/auth/login');
+        return null;
+      }
+      
+      const response = await fetch('http://127.0.0.1:8000/api/user-profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user');
+          navigate('/auth/login');
+          return null;
+        }
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      
+      const userData = await response.json();
+      return userData;
+    } catch (error) {
+      console.error('Error while fetching user:', error);
+      return null;
+    }
+  };
+
+  const updateUserInfo = async () => {
+    const userData = await fetchUserProfile();
+    
+    if (userData) {
+      const currentUserStr = localStorage.getItem('user');
+      let currentUser = null;
+      
+      try {
+        currentUser = JSON.parse(currentUserStr);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+      
+      if (!currentUser || currentUser.role !== userData.role) {
+        console.log('Updated user info');
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUserRole(userData.role || 'user');
+        
+        if (isAdmin && userData.role !== 'admin') {
+          navigate('/dash/user');
+        }
+        else if (!isAdmin && userData.role === 'admin') {
+          const goToAdmin = window.confirm('Voulez-vous etre redirige sur le dashboard admin?');
+          if (goToAdmin) {
+            navigate('/dash/admin');
+          }
+        }
+      }
+      
+      return userData.role;
+    }
+    
+    return null;
+  };
+
   useEffect(() => {
     const userStr = localStorage.getItem('user');
     
@@ -149,6 +219,14 @@ export function UnifiedDashboard({ isAdmin, ...props }) {
     } finally {
       setIsLoading(false);
     }
+    
+    updateUserInfo();
+    
+    const intervalId = setInterval(() => {
+      updateUserInfo();
+    }, 60000);
+    
+    return () => clearInterval(intervalId);
   }, [isAdmin, navigate]);
 
   if (isLoading) {
