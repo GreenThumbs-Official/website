@@ -17,6 +17,7 @@ function Details(){
             let plantImg = document.createElement('img');
             let sizeMax = document.createElement('p');
             let sizeMin = document.createElement('p');
+            plantImg.className = "w-64 h-64 object-cover rounded-lg shadow-lg";
 
 
             const plantSection = document.querySelector('.classPlantsFollow')
