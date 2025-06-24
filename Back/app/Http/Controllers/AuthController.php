@@ -34,15 +34,19 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'ville' => 'required|string|max:255',
+            'pays' => 'required|string|max:255',
+            'role' => 'in:admin,user', // optional, defaults to user
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'ville' => $request->ville,
+            'pays' => $request->pays,
+            'role' => $request->role ?? 'user',
         ]);
-
-        $user = User::where('email', $request->email)->first();
 
         $token = $user->createToken('api_token')->plainTextToken;
 
