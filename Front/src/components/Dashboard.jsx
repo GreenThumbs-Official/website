@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import Sidebar from '@/components/Nav/Sidebar';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard({
   userType = 'user', 
@@ -122,8 +123,41 @@ export default function Dashboard({
   );
 }
 
-export function UnifiedDashboard({ isAdmin = false, ...props }) {
-  if (isAdmin) {
+export function UnifiedDashboard({ isAdmin, ...props }) {
+  const [userRole, setUserRole] = useState('user');
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    
+    if (!userStr) {
+      navigate('/auth/login');
+      return;
+    }
+    
+    try {
+      const user = JSON.parse(userStr);
+      setUserRole(user.role || 'user');
+      
+      if (isAdmin && user.role !== 'admin') {
+        navigate('/dash/user');
+      }
+    } catch (error) {
+      console.error('Error while retrieving user info:', error);
+      setUserRole('user');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isAdmin, navigate]);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen bg-[#6fbc29]">
+      <div className="text-white text-xl">Chargement...</div>
+    </div>;
+  }
+
+  if (userRole === 'admin') {
     return <Dashboard userType="admin" {...props} />;
   }
   return <Dashboard userType="user" showButton={true} {...props} />;
