@@ -47,6 +47,7 @@ export default function ProfileMe() {
     location: '',
     avatar: null,
     joinedDate: '',
+    role: 'user',
     plantsCount: 0,
   });
 
@@ -101,6 +102,7 @@ export default function ProfileMe() {
           location: `${userData.ville || ''}, ${userData.pays || ''}`.trim(),
           avatar: userData.avatar || prev.avatar,
           joinedDate: userData.created_at || prev.joinedDate,
+          role: userData.role || 'user',
           plantsCount: 0, 
         };
         
@@ -244,9 +246,12 @@ export default function ProfileMe() {
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
                     <h1 className="text-3xl font-bold text-foreground">{user.username}</h1>
-                    <Badge variant="secondary" className="w-fit">
+                    <Badge 
+                      variant={user.role === 'admin' ? "destructive" : "secondary"} 
+                      className="w-fit"
+                    >
                       <User className="w-3 h-3 mr-1" />
-                      Membre
+                      {user.role === 'admin' ? 'Administrateur' : 'Membre'}
                     </Badge>
                   </div>
                   
