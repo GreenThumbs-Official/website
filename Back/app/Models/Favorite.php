@@ -13,6 +13,13 @@ class Favorite extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'name'
+        'name',
+        'description',
+        'image',
+        'origin',
+        'length',
+        'fruit_production_month',
+        'max_temp',
+        'min_temp'
     ];
 }
