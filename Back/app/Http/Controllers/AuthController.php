@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -26,6 +27,7 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user,
+            'onboarding_completed' => (bool) $user->onboarding_completed,
         ]);
     }
 
@@ -54,6 +56,19 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user,
+            'onboarding_completed' => (bool) $user->onboarding_completed,
         ], 201);
+    }
+
+    public function completeOnboarding(Request $request)
+    {
+        $user = Auth::user();
+        $user->onboarding_completed = true;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Onboarding completed successfully',
+            'user' => $user,
+        ]);
     }
 }

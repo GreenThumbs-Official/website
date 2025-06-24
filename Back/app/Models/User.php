@@ -32,6 +32,7 @@ class User extends Authenticatable
         'role',
         'ville',
         'pays',
+        'onboarding_completed',
     ];
 
     /**

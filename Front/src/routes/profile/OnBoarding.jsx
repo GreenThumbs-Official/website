@@ -17,10 +17,31 @@ export default function OnBoarding() {
   const nextStep = () => setCurrentStep(prev => prev + 1);
   const prevStep = () => setCurrentStep(prev => prev - 1);
 
-  const manageComplete = () => {
+  const manageComplete = async () => {
     console.log('Onboarding completed with data:', formData);
     
-    navigate('/dash/user');
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/complete-onboarding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error while completing onboarding.');
+      }
+      
+      const result = await response.json();
+      
+      localStorage.setItem('user', JSON.stringify(result.user));
+      
+      navigate('/dash/user');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while completing onboarding.');
+    }
   };
 
   const ProgressIndicator = () => (

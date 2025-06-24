@@ -74,7 +74,8 @@ export default function Register() {
       }
       const result = await response.json();
       localStorage.setItem('access_token', result.access_token);
-      navigate('/');
+      localStorage.setItem('user', JSON.stringify(result.user));
+      navigate('/profile/onboarding');
     } catch (error) {
       alert(error.message);
     }
