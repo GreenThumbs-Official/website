@@ -17,7 +17,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('user_intrest', function (Blueprint $table) {
+        Schema::create('user_intrests', function (Blueprint $table) {
             $table->ulid('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->ulid('intrest_id');

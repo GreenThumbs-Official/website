@@ -22,5 +22,9 @@ class Plant extends Model
         'max_temp',
         'min_temp'
     ];
-}
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_plants');
+    }
+}

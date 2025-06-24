@@ -63,4 +63,20 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+    /**
+     * The interests that belong to the user.
+     */
+    public function interests()
+    {
+        return $this->belongsToMany(Intrest::class, 'user_intrests');
+    }
+
+    /**
+     * The favorite plants that belong to the user.
+     */
+    public function favoritePlants()
+    {
+        return $this->belongsToMany(Plant::class, 'user_plants');
+    }
 }

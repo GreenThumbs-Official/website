@@ -13,7 +13,7 @@ use App\Http\Controllers\AuthController;
  * Routes used for authentification
  */
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 /**
  * Test route for API tokens

@@ -36,8 +36,6 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'ville' => 'required|string|max:255',
-            'pays' => 'required|string|max:255',
             'role' => 'in:admin,user', // optional, defaults to user
         ]);
 
@@ -45,8 +43,6 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'ville' => $request->ville,
-            'pays' => $request->pays,
             'role' => $request->role ?? 'user',
         ]);
 
@@ -60,16 +56,32 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function completeOnboarding(Request $request)
-    {
+    public function completeOnboarding(Request $request) {
+        $request->validate([
+            'profile.ville' => 'required|string|max:255',
+            'profile.pays' => 'required|string|max:255',
+        ]);
+
+        $profile = $request->input('profile');
+        $interests = $request->input('interests');
+        $favoritePlants = $request->input('favoritePlants');
+
+
         $user = Auth::user();
+        $user->ville = $profile['ville'];
+        $user->pays = $profile['pays'];
+
+        // Sync interests and favorite plants
+        if (is_array($interests)) {
+            $user->interests()->sync($interests);
+        }
+        if (is_array($favoritePlants)) {
+            $user->favoritePlants()->sync($favoritePlants);
+        }
+
         $user->onboarding_completed = true;
         $user->save();
-
-        return response()->json([
-            'message' => 'Onboarding completed successfully',
-            'user' => $user,
-        ]);
+        return response()->json(['message' => 'Position updated successfully', 'user' => $user]);
     }
 
     public function updateProfile(Request $request)
@@ -82,11 +94,11 @@ class AuthController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
         $location = $request->location;
         $ville = $user->ville;
         $pays = $user->pays;
-        
+
         if ($location) {
             $locationParts = explode(',', $location);
             if (count($locationParts) >= 2) {
@@ -96,7 +108,7 @@ class AuthController extends Controller
                 $ville = trim($locationParts[0]);
             }
         }
-        
+
         $user->name = $request->username;
         $user->email = $request->email;
         $user->bio = $request->bio;
