@@ -2,7 +2,7 @@
 
 case "$1" in
   up)
-    docker compose up -d --build
+    docker compose up -d --build backend mysql nginx phpmyadmin frontend-dev
     docker compose exec backend composer install
     docker compose exec backend cp ./.env.example ./.env
     docker compose exec backend php artisan key:generate

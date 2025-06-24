@@ -78,26 +78,26 @@ services:
         environment:
             - VITE_API_URL=http://localhost:8080/api
 
-    # Development React frontend (use with --profile dev)
+    # Development React frontend
     frontend-dev:
         build:
             context: ./Front
             dockerfile: Dockerfile.dev
         container_name: react_frontend_dev
         restart: unless-stopped
-        ports:
-            - "5173:5173"
+        working_dir: /app
+        command: npm run dev -- --host 0.0.0.0
         volumes:
             - ./Front:/app
             - /app/node_modules
+        ports:
+            - "5173:5173"
         networks:
             - laravel_network
         environment:
             - NODE_ENV=development
             - VITE_API_URL=http://localhost:8080/api
             - CHOKIDAR_USEPOLLING=true
-        profiles:
-            - dev
 
 networks:
     laravel_network:
