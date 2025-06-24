@@ -17,15 +17,18 @@ function Details(){
             let plantDescription = document.createElement('p');
             let plantImg = document.createElement('img');
             let sizeMax = document.createElement('p');
-            let plantOrigin = document.createElement('p');
+            let sizeMin = document.createElement('p');
+            const plantDescription = document.createElement('p');
+            const plantOrigin = document.createElement('p');
+            plantImg.className = "w-64 h-64 object-cover rounded-lg shadow-lg";
 
 
             const plantSection = document.querySelector('.classPlantsFollow')
-        
+
             plantDescription.textContent = plants.description
             plantOrigin.textContent = plants.origin[0];
 
-
+ 
             plantName.textContent = plants.common_name
             plantImg.setAttribute('src', plants.default_image.regular_url) 
 
@@ -36,6 +39,10 @@ function Details(){
             plantSection.appendChild(plantImg)  
             plantSection.appendChild(plantDescription)      
             plantStock.appendChild(sizeMax)
+<<<<<<< HEAD
+=======
+            plantStock.appendChild(plantDescription)
+>>>>>>> emir
             plantStock.appendChild(plantOrigin)
             plantSection.appendChild(plantStock)
 
