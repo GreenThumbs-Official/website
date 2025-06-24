@@ -22,7 +22,7 @@ function Details(){
             const plantSection = document.querySelector('.classPlantsFollow')
  
             plantName.textContent = plants.common_name
-            plantImg.setAttribute('src', plants.image_url)
+            plantImg.setAttribute('src', plants.default_image.regular_url) 
 
             let maxVal = parseInt(plants.dimensions[0].max_value) * 0.304 + "m"
             sizeMax.textContent = "Taille maximale de la plante " + maxVal
