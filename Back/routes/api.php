@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::post('/complete-onboarding', [AuthController::class, 'completeOnboarding']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
 });
 
 /**

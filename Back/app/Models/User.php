@@ -33,6 +33,7 @@ class User extends Authenticatable
         'ville',
         'pays',
         'onboarding_completed',
+        'bio',
     ];
 
     /**

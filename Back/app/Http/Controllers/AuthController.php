@@ -71,4 +71,42 @@ class AuthController extends Controller
             'user' => $user,
         ]);
     }
+
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . Auth::id(),
+            'bio' => 'nullable|string|max:500',
+            'location' => 'nullable|string|max:100',
+        ]);
+
+        $user = Auth::user();
+        
+        $location = $request->location;
+        $ville = $user->ville;
+        $pays = $user->pays;
+        
+        if ($location) {
+            $locationParts = explode(',', $location);
+            if (count($locationParts) >= 2) {
+                $ville = trim($locationParts[0]);
+                $pays = trim($locationParts[1]);
+            } elseif (count($locationParts) == 1) {
+                $ville = trim($locationParts[0]);
+            }
+        }
+        
+        $user->name = $request->username;
+        $user->email = $request->email;
+        $user->bio = $request->bio;
+        $user->ville = $ville;
+        $user->pays = $pays;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profil mis à jour avec succès',
+            'user' => $user,
+        ]);
+    }
 }
