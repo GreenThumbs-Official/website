@@ -20,6 +20,7 @@ return new class extends Migration
             $table->enum('role', ['admin', 'user'])->default('user');
             $table->string('ville');
             $table->string('pays');
+            $table->boolean('onboarding_completed')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

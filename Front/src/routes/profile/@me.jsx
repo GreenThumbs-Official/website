@@ -20,7 +20,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import Header from '@/components/Nav/Header';
 import Background from '@/components/ui/background';
-import { User, Mail, Calendar, MapPin, Edit, Save, X, Camera } from 'lucide-react';
+import { User, Mail, Calendar, MapPin, Edit, Save, X, Camera, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const profileSchema = z.object({
   username: z.string().min(3, 'Le nom d\'utilisateur doit contenir au moins 3 caractères'),
@@ -31,14 +32,22 @@ const profileSchema = z.object({
 
 export default function ProfileMe() {
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [plants, setPlants] = useState([]);
+  const [plantsLoading, setPlantsLoading] = useState(true);
+  const [plantsError, setPlantsError] = useState(null);
+  const navigate = useNavigate();
+  
   const [user, setUser] = useState({
-    id: 1,
-    username: 'JohnDoe',
-    email: 'john.doe@example.com',
-    bio: 'Passionné de jardinage et de plantes vertes. J\'adore partager mes conseils et découvertes avec la communauté GreenThumbs !',
-    location: 'Lyon, France',
+    id: '',
+    username: '',
+    email: '',
+    bio: '',
+    location: '',
     avatar: null,
-    joinedDate: '2025-06-23',
+    joinedDate: '',
+    role: 'user',
     plantsCount: 0,
   });
 
@@ -52,26 +61,110 @@ export default function ProfileMe() {
     },
   });
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      const userData = JSON.parse(storedUser);
+  const fetchUserProfile = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        navigate('/auth/login');
+        return;
+      }
+      
+      const response = await fetch('http://127.0.0.1:8000/api/user-profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user');
+          navigate('/auth/login');
+          return;
+        }
+        throw new Error(`Error: ${response.status}`);
+      }
+      
+      const userData = await response.json();
+      
+      localStorage.setItem('user', JSON.stringify(userData));
+      
       setUser(prev => {
-        const updatedUser = { ...prev, ...userData };
-        form.reset({
-          username: userData.username || prev.username,
+        const updatedUser = {
+          id: userData.id || prev.id,
+          username: userData.name || prev.username,
           email: userData.email || prev.email,
           bio: userData.bio || prev.bio,
-          location: userData.location || prev.location,
+          location: `${userData.ville || ''}, ${userData.pays || ''}`.trim(),
+          avatar: userData.avatar || prev.avatar,
+          joinedDate: userData.created_at || prev.joinedDate,
+          role: userData.role || 'user',
+          plantsCount: 0, 
+        };
+        
+        form.reset({
+          username: updatedUser.username,
+          email: updatedUser.email,
+          bio: updatedUser.bio || '',
+          location: updatedUser.location || '',
         });
+        
         return updatedUser;
       });
+    } catch (error) {
+      console.error('Error while fetcing user data:', error);
+      setError('Impossible to fetch user data. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
-  }, [form]);
+  };
+  
+  const fetchUserPlants = async () => {
+    setPlantsLoading(true);
+    setPlantsError(null);
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+      
+      const response = await fetch('http://127.0.0.1:8000/api/plants', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setPlants(data.data || []);
+      
+      setUser(prev => ({
+        ...prev,
+        plantsCount: data.data ? data.data.length : 0,
+      }));
+    } catch (error) {
+      console.error('Error while fetching plants:', error);
+      setPlantsError('Impossible de récupérer vos plantes. Veuillez réessayer plus tard.');
+    } finally {
+      setPlantsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchUserProfile();
+    fetchUserPlants();
+  }, []);
 
   const onSubmit = async (data) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       const response = await fetch('http://127.0.0.1:8000/api/profile', {
         method: 'PUT',
         headers: {
@@ -119,7 +212,18 @@ export default function ProfileMe() {
       <Background />
       <Header />
       
-      <div className="container mx-auto px-4 pt-24 pb-12">
+      {isLoading ? (
+        <div className="container mx-auto px-4 pt-24 pb-12 flex justify-center items-center min-h-[50vh]">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <span className="ml-3 text-xl">Chargement de votre profil...</span>
+        </div>
+      ) : error ? (
+        <div className="container mx-auto px-4 pt-24 pb-12 flex flex-col justify-center items-center min-h-[50vh]">
+          <div className="text-destructive text-center mb-4">{error}</div>
+          <Button onClick={fetchUserProfile}>Réessayer</Button>
+        </div>
+      ) : (
+        <div className="container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-4xl mx-auto space-y-8">
           <Card className="border-primary/20">
             <CardContent className="pt-6">
@@ -142,9 +246,12 @@ export default function ProfileMe() {
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
                     <h1 className="text-3xl font-bold text-foreground">{user.username}</h1>
-                    <Badge variant="secondary" className="w-fit">
+                    <Badge 
+                      variant={user.role === 'admin' ? "destructive" : "secondary"} 
+                      className="w-fit"
+                    >
                       <User className="w-3 h-3 mr-1" />
-                      Membre
+                      {user.role === 'admin' ? 'Administrateur' : 'Membre'}
                     </Badge>
                   </div>
                   
@@ -311,18 +418,70 @@ export default function ProfileMe() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <div className="text-6xl mb-4">🌿</div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Aucune plante pour le moment
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  Commencez à ajouter vos plantes pour suivre leur croissance !
-                </p>
-                <Button className="bg-primary hover:bg-primary/90">
-                  Ajouter ma première plante
-                </Button>
-              </div>
+              {plantsLoading ? (
+                <div className="flex justify-center items-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <span className="ml-2">Chargement de vos plantes...</span>
+                </div>
+              ) : plantsError ? (
+                <div className="text-center py-8 text-destructive">
+                  <p>{plantsError}</p>
+                  <Button 
+                    onClick={fetchUserPlants} 
+                    variant="outline" 
+                    className="mt-4"
+                  >
+                    Réessayer
+                  </Button>
+                </div>
+              ) : plants.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-6xl mb-4">🌿</div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Aucune plante pour le moment
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    Commencez à ajouter vos plantes pour suivre leur croissance !
+                  </p>
+                  <Button className="bg-primary hover:bg-primary/90">
+                    Ajouter ma première plante
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {plants.map((plant) => (
+                    <Card key={plant.id} className="overflow-hidden">
+                      <div className="aspect-square relative bg-muted">
+                        {plant.image ? (
+                          <img 
+                            src={plant.image} 
+                            alt={plant.name} 
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full text-4xl">
+                            🌱
+                          </div>
+                        )}
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold text-lg mb-1">{plant.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {plant.description || 'Aucune description'}
+                        </p>
+                        <div className="mt-2 flex justify-between items-center">
+                          <Badge variant="outline" className="text-xs">
+                            {plant.origin || 'Origine inconnue'}
+                          </Badge>
+                          <Button variant="ghost" size="sm" className="text-primary">
+                            Détails
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -350,6 +509,7 @@ export default function ProfileMe() {
           </Card>
         </div>
       </div>
+      )}
     </div>
   );
 }
