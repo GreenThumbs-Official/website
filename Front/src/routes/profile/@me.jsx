@@ -22,6 +22,15 @@ import Header from '@/components/Nav/Header';
 import Background from '@/components/ui/background';
 import { User, Mail, Calendar, MapPin, Edit, Save, X, Camera, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { parseISO } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 const profileSchema = z.object({
   username: z.string().min(3, 'Le nom d\'utilisateur doit contenir au moins 3 caractères'),
@@ -37,8 +46,17 @@ export default function ProfileMe() {
   const [plants, setPlants] = useState([]);
   const [plantsLoading, setPlantsLoading] = useState(true);
   const [plantsError, setPlantsError] = useState(null);
+  const [selectedPlant, setSelectedPlant] = useState(null);
+  const [isPlantDialogOpen, setIsPlantDialogOpen] = useState(false);
+  const [isAddPlantDialogOpen, setIsAddPlantDialogOpen] = useState(false);
+  const [newPlant, setNewPlant] = useState({
+    name: '',
+    description: '',
+    origin: '',
+    wateringFrequency: 7,
+    image: null
+  });
   const navigate = useNavigate();
-  
   const [user, setUser] = useState({
     id: '',
     username: '',
@@ -130,7 +148,7 @@ export default function ProfileMe() {
       const token = localStorage.getItem('access_token');
       if (!token) return;
       
-      const response = await fetch('http://127.0.0.1:8000/api/plants', {
+      const response = await fetch('/api/user-plants', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -139,24 +157,132 @@ export default function ProfileMe() {
       });
       
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        if (response.status === 404) {
+          throw new Error('L\'endpoint /api/user-plants n\'existe pas. Vérifiez que le serveur backend est démarré.');
+        }
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      // Vérifier le type de contenu avant de parser en JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Le serveur a retourné du HTML au lieu de JSON. Vérifiez que l\'API backend est accessible et que l\'endpoint existe.');
       }
       
       const data = await response.json();
-      setPlants(data.data || []);
+      
+      // Vérifier si la réponse est un tableau ou contient un tableau
+      const plantsArray = Array.isArray(data) ? data : (data.data || data.plants || []);
+      
+      // Formater les données pour l'affichage
+      const formattedPlants = plantsArray.map(plant => ({
+        id: plant.id,
+        name: plant.name,
+        description: plant.description || '',
+        origin: plant.origin || '',
+        image: plant.image || null,
+        wateringFrequency: plant.watering_frequency || 7,
+        lastWatered: plant.last_watered || null,
+        nextWatering: plant.next_watering || null,
+        growthProgress: calculateGrowthProgress(plant.last_watered, plant.watering_frequency),
+        growthStage: getGrowthStage(calculateGrowthProgress(plant.last_watered, plant.watering_frequency))
+      }));
+      
+      setPlants(formattedPlants);
       
       setUser(prev => ({
         ...prev,
-        plantsCount: data.data ? data.data.length : 0,
+        plantsCount: formattedPlants.length,
       }));
     } catch (error) {
       console.error('Error while fetching plants:', error);
-      setPlantsError('Impossible de récupérer vos plantes. Veuillez réessayer plus tard.');
+      
+      // Messages d'erreur plus spécifiques
+      if (error.message.includes('DOCTYPE')) {
+        setPlantsError('Le serveur backend ne répond pas correctement. Vérifiez qu\'il est démarré sur le port 8000.');
+      } else if (error.message.includes('Failed to fetch')) {
+        setPlantsError('Impossible de contacter le serveur. Vérifiez votre connexion et que le serveur backend est démarré.');
+      } else {
+        setPlantsError(error.message || 'Impossible de récupérer vos plantes. Veuillez réessayer plus tard.');
+      }
     } finally {
       setPlantsLoading(false);
     }
   };
   
+  const calculateGrowthProgress = (lastWatered, frequency) => {
+    if (!lastWatered || !frequency) return 0;
+    
+    const lastWateredDate = parseISO(lastWatered);
+    const today = new Date();
+    const daysSinceLastWatered = Math.floor((today - lastWateredDate) / (1000 * 60 * 60 * 24));
+    
+    return Math.min(Math.floor(daysSinceLastWatered / frequency * 100), 100);
+  };
+
+  const getGrowthStage = (progress) => {
+    if (progress < 30) return 'Jeune';
+    if (progress < 70) return 'En croissance';
+    return 'Mature';
+  };
+  
+  const handleAddPlant = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+      
+      const response = await fetch('/api/user-plants', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newPlant.name,
+          description: newPlant.description,
+          origin: newPlant.origin,
+          watering_frequency: newPlant.wateringFrequency,
+          image: newPlant.image
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      
+      fetchUserPlants();
+      
+      setNewPlant({
+        name: '',
+        description: '',
+        origin: '',
+        wateringFrequency: 7,
+        image: null
+      });
+      
+      // Fermer la boîte de dialogue
+      setIsAddPlantDialogOpen(false);
+      
+    } catch (error) {
+      console.error('Error while adding plant:', error);
+      setPlantsError('Impossible d\'ajouter la plante. Veuillez réessayer plus tard.');
+    }
+  };
+  
+  const handlePlantClick = (plant) => {
+    setSelectedPlant(plant);
+    setIsPlantDialogOpen(true);
+  };
+  
+  const formatPlantDate = (dateString) => {
+    if (!dateString) return 'Non disponible';
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   useEffect(() => {
     fetchUserProfile();
     fetchUserPlants();
@@ -408,14 +534,22 @@ export default function ProfileMe() {
           )}
 
           <Card className="border-primary/20">
-            <CardHeader>
-              <CardTitle className="text-primary flex items-center gap-2">
-                <span>🌱</span>
-                Mes plantes
-              </CardTitle>
-              <CardDescription>
-                Gérez votre collection de plantes
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-primary flex items-center gap-2">
+                  <span>🌱</span>
+                  Mes plantes
+                </CardTitle>
+                <CardDescription>
+                  Gérez votre collection de plantes
+                </CardDescription>
+              </div>
+              <Button 
+                onClick={() => setIsAddPlantDialogOpen(true)}
+                className="bg-primary hover:bg-primary/90"
+              >
+                Ajouter une plante
+              </Button>
             </CardHeader>
             <CardContent>
               {plantsLoading ? (
@@ -443,14 +577,17 @@ export default function ProfileMe() {
                   <p className="text-muted-foreground mb-4">
                     Commencez à ajouter vos plantes pour suivre leur croissance !
                   </p>
-                  <Button className="bg-primary hover:bg-primary/90">
+                  <Button 
+                    onClick={() => setIsAddPlantDialogOpen(true)}
+                    className="bg-primary hover:bg-primary/90"
+                  >
                     Ajouter ma première plante
                   </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {plants.map((plant) => (
-                    <Card key={plant.id} className="overflow-hidden">
+                    <Card key={plant.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer" onClick={() => handlePlantClick(plant)}>
                       <div className="aspect-square relative bg-muted">
                         {plant.image ? (
                           <img 
@@ -463,19 +600,41 @@ export default function ProfileMe() {
                             🌱
                           </div>
                         )}
+                        {plant.lastWatered && (
+                          <div className="absolute bottom-2 right-2 bg-primary text-white text-xs px-2 py-1 rounded-full">
+                            {plant.nextWatering ? `Arrosage: ${formatPlantDate(plant.nextWatering)}` : `Dernier arrosage: ${formatPlantDate(plant.lastWatered)}`}
+                          </div>
+                        )}
                       </div>
                       <CardContent className="p-4">
                         <h3 className="font-semibold text-lg mb-1">{plant.name}</h3>
                         <p className="text-sm text-muted-foreground line-clamp-2">
                           {plant.description || 'Aucune description'}
                         </p>
+                        <div className="mt-2">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs font-medium">Croissance</span>
+                            <span className="text-xs font-medium">{plant.growthProgress || 0}%</span>
+                          </div>
+                          <div className="w-full bg-white bg-opacity-20 rounded-full h-1.5">
+                            <div 
+                              className="h-1.5 rounded-full" 
+                              style={{
+                                width: `${plant.growthProgress || 0}%`,
+                                backgroundColor: plant.growthProgress < 30 ? '#60a5fa' : 
+                                                plant.growthProgress < 70 ? '#10b981' : 
+                                                '#84cc16'
+                              }}
+                            ></div>
+                          </div>
+                        </div>
                         <div className="mt-2 flex justify-between items-center">
                           <Badge variant="outline" className="text-xs">
                             {plant.origin || 'Origine inconnue'}
                           </Badge>
-                          <Button variant="ghost" size="sm" className="text-primary">
-                            Détails
-                          </Button>
+                          <Badge variant="secondary" className="text-xs">
+                            {plant.growthStage || 'Stade inconnu'}
+                          </Badge>
                         </div>
                       </CardContent>
                     </Card>
@@ -484,6 +643,164 @@ export default function ProfileMe() {
               )}
             </CardContent>
           </Card>
+          
+          {/* Dialogue de détails de plante */}
+          <Dialog open={isPlantDialogOpen} onOpenChange={setIsPlantDialogOpen}>
+            <DialogContent className="bg-gray-900 text-white border-gray-700 max-w-2xl">
+              {selectedPlant && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle className="text-xl">{selectedPlant.name}</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="aspect-square relative bg-muted rounded-md overflow-hidden">
+                      {selectedPlant.image ? (
+                        <img 
+                          src={selectedPlant.image} 
+                          alt={selectedPlant.name} 
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-6xl">
+                          🌱
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400">Description</h3>
+                        <p className="mt-1">{selectedPlant.description || 'Aucune description disponible'}</p>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400">Origine</h3>
+                        <p className="mt-1">{selectedPlant.origin || 'Origine inconnue'}</p>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400">Fréquence d'arrosage</h3>
+                        <p className="mt-1">Tous les {selectedPlant.wateringFrequency} jours</p>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400">Dernier arrosage</h3>
+                        <p className="mt-1">{selectedPlant.lastWatered ? formatPlantDate(selectedPlant.lastWatered) : 'Jamais'}</p>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400">Prochain arrosage</h3>
+                        <p className="mt-1">{selectedPlant.nextWatering ? formatPlantDate(selectedPlant.nextWatering) : 'Non planifié'}</p>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400">Stade de croissance</h3>
+                        <div className="mt-2">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs">{selectedPlant.growthStage}</span>
+                            <span className="text-xs">{selectedPlant.growthProgress}%</span>
+                          </div>
+                          <div className="w-full bg-white bg-opacity-20 rounded-full h-2">
+                            <div 
+                              className="h-2 rounded-full" 
+                              style={{
+                                width: `${selectedPlant.growthProgress}%`,
+                                backgroundColor: selectedPlant.growthProgress < 30 ? '#60a5fa' : 
+                                                selectedPlant.growthProgress < 70 ? '#10b981' : 
+                                                '#84cc16'
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter className="mt-4">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setIsPlantDialogOpen(false)}
+                      className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                    >
+                      Fermer
+                    </Button>
+                  </DialogFooter>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
+          
+          {/* Dialogue d'ajout de plante */}
+          <Dialog open={isAddPlantDialogOpen} onOpenChange={setIsAddPlantDialogOpen}>
+            <DialogContent className="bg-gray-900 text-white border-gray-700">
+              <DialogHeader>
+                <DialogTitle>Ajouter une nouvelle plante</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="plantName">Nom de la plante</Label>
+                  <Input 
+                    id="plantName" 
+                    value={newPlant.name} 
+                    onChange={(e) => setNewPlant({...newPlant, name: e.target.value})} 
+                    placeholder="Monstera Deliciosa"
+                    className="bg-gray-800 border-gray-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="plantDescription">Description</Label>
+                  <Textarea 
+                    id="plantDescription" 
+                    value={newPlant.description} 
+                    onChange={(e) => setNewPlant({...newPlant, description: e.target.value})} 
+                    placeholder="Une description de votre plante..."
+                    className="bg-gray-800 border-gray-700 min-h-[80px]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="plantOrigin">Origine</Label>
+                  <Input 
+                    id="plantOrigin" 
+                    value={newPlant.origin} 
+                    onChange={(e) => setNewPlant({...newPlant, origin: e.target.value})} 
+                    placeholder="Amérique du Sud"
+                    className="bg-gray-800 border-gray-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="wateringFrequency">Fréquence d'arrosage (jours)</Label>
+                  <Input 
+                    id="wateringFrequency" 
+                    type="number" 
+                    min="1" 
+                    max="30" 
+                    value={newPlant.wateringFrequency} 
+                    onChange={(e) => setNewPlant({...newPlant, wateringFrequency: parseInt(e.target.value)})} 
+                    className="bg-gray-800 border-gray-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="plantImage">Image (URL)</Label>
+                  <Input 
+                    id="plantImage" 
+                    value={newPlant.image || ''} 
+                    onChange={(e) => setNewPlant({...newPlant, image: e.target.value})} 
+                    placeholder="https://example.com/image.jpg"
+                    className="bg-gray-800 border-gray-700"
+                  />
+                </div>
+              </div>
+              <DialogFooter className="mt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsAddPlantDialogOpen(false)}
+                  className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                >
+                  Annuler
+                </Button>
+                <Button 
+                  onClick={handleAddPlant}
+                  className="bg-primary hover:bg-primary/90"
+                  disabled={!newPlant.name}
+                >
+                  Ajouter
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       )}
