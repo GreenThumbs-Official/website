@@ -34,6 +34,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 export default function AdminIndex() {
   const navigate = useNavigate();
@@ -49,6 +58,12 @@ export default function AdminIndex() {
     password: '',
     password_confirmation: ''
   });
+  
+  const [currentUserPage, setCurrentUserPage] = useState(1);
+  const [currentPlantPage, setCurrentPlantPage] = useState(1);
+  const [totalUserPages, setTotalUserPages] = useState(1);
+  const [totalPlantPages, setTotalPlantPages] = useState(1);
+  const itemsPerPage = 3;
 
   useEffect(() => {
     fetchUsers();
@@ -79,7 +94,8 @@ export default function AdminIndex() {
       }
       
       const data = await response.json();
-      setUsersData(data.data.slice(0, 3));
+      setUsersData(data.data);
+      setTotalUserPages(Math.ceil(data.data.length / itemsPerPage));
       setLoading(false);
     } catch (error) {
       console.error('Erreur:', error);
@@ -94,11 +110,14 @@ export default function AdminIndex() {
       if (!response.ok) {
         throw new Error('Erreur lors de la récupération des plantes');
       }
-      const data = await response.json();
-      setPlantsData(data.slice(0, 3));
+      const responseData = await response.json();
+      const data = responseData.data || responseData;
+      const plantsArray = Array.isArray(data) ? data : [];
+      setPlantsData(plantsArray);
+      setTotalPlantPages(Math.ceil(plantsArray.length / itemsPerPage));
     } catch (error) {
       console.error('Erreur:', error);
-      setPlantsData([
+      const mockData = [
         {
           id: 1,
           name: 'Monstera Deliciosa',
@@ -114,7 +133,9 @@ export default function AdminIndex() {
           name: 'Cactus Barrel',
           category: 'Succulente',
         }
-      ]);
+      ];
+      setPlantsData(mockData);
+      setTotalPlantPages(Math.ceil(mockData.length / itemsPerPage));
     }
   };
 
@@ -315,13 +336,15 @@ export default function AdminIndex() {
                         </TableCell>
                       </TableRow>
                     ) : usersData.length > 0 ? (
-                      usersData.map((user) => (
-                        <TableRow key={user.id} className="border-b border-white border-opacity-10">
-                          <TableCell className="text-white">{user.name}</TableCell>
-                          <TableCell className="text-white">{user.email}</TableCell>
-                          <TableCell className="text-white">{user.role}</TableCell>
-                        </TableRow>
-                      ))
+                      usersData
+                        .slice((currentUserPage - 1) * itemsPerPage, currentUserPage * itemsPerPage)
+                        .map((user) => (
+                          <TableRow key={user.id} className="border-b border-white border-opacity-10">
+                            <TableCell className="text-white">{user.name}</TableCell>
+                            <TableCell className="text-white">{user.email}</TableCell>
+                            <TableCell className="text-white">{user.role}</TableCell>
+                          </TableRow>
+                        ))
                     ) : (
                       <TableRow>
                         <TableCell colSpan={3} className="text-center text-white text-opacity-60 py-4">
@@ -332,19 +355,64 @@ export default function AdminIndex() {
                   </TableBody>
                 </Table>
               </div>
-              <div className="flex gap-2 mt-4">
-                <Button 
-                  onClick={() => navigate('/dash/admin/users')} 
-                  className="flex-1 bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30"
-                >
-                  Voir tous
-                </Button>
-                <Button 
-                  onClick={manageAddUser} 
-                  className="flex-1 bg-green-500 hover:bg-green-600 text-white"
-                >
-                  Ajouter
-                </Button>
+              <div className="mt-4">
+                <Pagination>
+                  <PaginationContent>
+                    {currentUserPage > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => setCurrentUserPage(prev => Math.max(prev - 1, 1))} 
+                          className="bg-white bg-opacity-20 text-white hover:bg-white hover:bg-opacity-30 hover:text-black"
+                        />
+                      </PaginationItem>
+                    )}
+                    
+                    {Array.from({ length: Math.min(totalUserPages, 3) }, (_, i) => {
+                      const pageNumber = i + 1;
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationLink 
+                            onClick={() => setCurrentUserPage(pageNumber)}
+                            isActive={currentUserPage === pageNumber}
+                            className="bg-white bg-opacity-20 text-white hover:bg-white hover:bg-opacity-30 hover:text-black"
+                          >
+                            {pageNumber}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })}
+                    
+                    {totalUserPages > 3 && (
+                      <PaginationItem>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+                    
+                    {currentUserPage < totalUserPages && (
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => setCurrentUserPage(prev => Math.min(prev + 1, totalUserPages))} 
+                          className="bg-white bg-opacity-20 text-white hover:bg-white hover:bg-opacity-30 hover:text-black"
+                        />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+                
+                <div className="flex gap-2 mt-4">
+                  <Button 
+                    onClick={() => navigate('/dash/admin/users')} 
+                    className="flex-1 bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30"
+                  >
+                    Voir tous
+                  </Button>
+                  <Button 
+                    onClick={manageAddUser} 
+                    className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+                  >
+                    Ajouter
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -365,22 +433,76 @@ export default function AdminIndex() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {plantsData.slice(0, 3).map((plant) => (
-                      <TableRow key={plant.id} className="border-b border-white border-opacity-10">
-                        <TableCell className="text-white">{plant.name}</TableCell>
-                        <TableCell className="text-white">{plant.category}</TableCell>
-                        <TableCell className="text-white">{plant.stock}</TableCell>
+                    {Array.isArray(plantsData) && plantsData.length > 0 ? plantsData
+                      .slice((currentPlantPage - 1) * itemsPerPage, currentPlantPage * itemsPerPage)
+                      .map((plant) => (
+                        <TableRow key={plant.id} className="border-b border-white border-opacity-10">
+                          <TableCell className="text-white">{plant.name}</TableCell>
+                          <TableCell className="text-white">{plant.category}</TableCell>
+                          <TableCell className="text-white">{plant.stock}</TableCell>
+                        </TableRow>
+                      ))
+                    : (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center text-white text-opacity-60 py-4">
+                          Aucune plante trouvée
+                        </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </div>
-              <Button 
-                onClick={() => navigate('/dash/admin/plants')} 
-                className="mt-4 w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30"
-              >
-                Voir toutes les plantes
-              </Button>
+              <div className="mt-4">
+                <Pagination>
+                  <PaginationContent>
+                    {currentPlantPage > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => setCurrentPlantPage(prev => Math.max(prev - 1, 1))} 
+                          className="bg-white bg-opacity-20 text-white hover:bg-white hover:bg-opacity-30 hover:text-black"
+                        />
+                      </PaginationItem>
+                    )}
+                    
+                    {Array.from({ length: Math.min(totalPlantPages, 3) }, (_, i) => {
+                      const pageNumber = i + 1;
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationLink 
+                            onClick={() => setCurrentPlantPage(pageNumber)}
+                            isActive={currentPlantPage === pageNumber}
+                            className="bg-white bg-opacity-20 text-white hover:bg-white hover:bg-opacity-30 hover:text-black"
+                          >
+                            {pageNumber}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })}
+                    
+                    {totalPlantPages > 3 && (
+                      <PaginationItem>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+                    
+                    {currentPlantPage < totalPlantPages && (
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => setCurrentPlantPage(prev => Math.min(prev + 1, totalPlantPages))} 
+                          className="bg-white bg-opacity-20 text-white hover:bg-white hover:bg-opacity-30 hover:text-black"
+                        />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+                
+                <Button 
+                  onClick={() => navigate('/dash/admin/plants')} 
+                  className="mt-4 w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30"
+                >
+                  Voir toutes les plantes
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

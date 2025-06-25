@@ -40,7 +40,7 @@ const PaginationLink = ({
     className={cn(buttonVariants({
       variant: isActive ? "outline" : "ghost",
       size,
-    }), className)}
+    }), "cursor-pointer", className)}
     {...props} />
 )
 PaginationLink.displayName = "PaginationLink"
@@ -52,7 +52,7 @@ const PaginationPrevious = ({
   <PaginationLink
     aria-label="Go to previous page"
     size="default"
-    className={cn("gap-1 pl-2.5", className)}
+    className={cn("gap-1 pl-2.5 cursor-pointer", className)}
     {...props}>
     <ChevronLeft className="h-4 w-4" />
     <span>Previous</span>
@@ -67,7 +67,7 @@ const PaginationNext = ({
   <PaginationLink
     aria-label="Go to next page"
     size="default"
-    className={cn("gap-1 pr-2.5", className)}
+    className={cn("gap-1 pr-2.5 cursor-pointer", className)}
     {...props}>
     <span>Next</span>
     <ChevronRight className="h-4 w-4" />
@@ -81,7 +81,7 @@ const PaginationEllipsis = ({
 }) => (
   <span
     aria-hidden
-    className={cn("flex h-9 w-9 items-center justify-center", className)}
+    className={cn("flex h-9 w-9 items-center justify-center cursor-pointer", className)}
     {...props}>
     <MoreHorizontal className="h-4 w-4" />
     <span className="sr-only">More pages</span>
