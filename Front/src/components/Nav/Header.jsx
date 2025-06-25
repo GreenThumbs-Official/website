@@ -47,6 +47,12 @@ export default function Header() {
           {isAdmin && (
             <a href="/dash/admin" className="hover:text-gray-200 transition-colors">Dashboard Admin</a>
           )}
+          {!user && (
+            <>
+              <a href="/auth/login" className="hover:text-gray-200 transition-colors">Connexion</a>
+              <a href="/auth/register" className="hover:text-gray-200 transition-colors">Inscription</a>
+            </>
+          )}
         </div>
       </nav>
     </header>
