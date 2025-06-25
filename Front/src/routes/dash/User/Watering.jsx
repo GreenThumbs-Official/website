@@ -92,7 +92,7 @@ export default function WateringCalendar() {
     setWateringSchedule(schedule);
   };
 
-  const handlePlantSelect = (plantId) => {
+  const managePlantSelect = (plantId) => {
     const plant = plants.find(p => p.id === parseInt(plantId));
     setSelectedPlant(plant);
     setIsPlantDialogOpen(false);
@@ -204,7 +204,7 @@ export default function WateringCalendar() {
                     <p className="text-gray-300">
                       Choisissez une plante pour voir son calendrier d'arrosage :
                     </p>
-                    <Select onValueChange={handlePlantSelect}>
+                    <Select onValueChange={managePlantSelect}>
                       <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                         <SelectValue placeholder="Sélectionner une plante" />
                       </SelectTrigger>
@@ -262,7 +262,6 @@ export default function WateringCalendar() {
 
         {selectedPlant && (
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Calendrier */}
             <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
               <CardHeader>
                 <CardTitle className="text-white">Calendrier</CardTitle>
@@ -354,7 +353,6 @@ export default function WateringCalendar() {
                 </Card>
               )}
 
-              {/* Prochains arrosages */}
               <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
                 <CardHeader>
                   <CardTitle className="text-white">Prochains arrosages</CardTitle>
