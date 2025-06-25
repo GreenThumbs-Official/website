@@ -9,6 +9,23 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -16,6 +33,13 @@ export default function AdminUsers() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    role: ''
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -97,8 +121,78 @@ export default function AdminUsers() {
     alert('Ajouter un nouvel utilisateur');
   };
 
-  const manageEdit = (userId) => {
-    alert(`User ID: ${userId}`);
+  const manageEdit = async (userId) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/users/${userId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des détails de l\'utilisateur');
+      }
+      
+      const userData = await response.json();
+      setCurrentUser(userData);
+      setFormData({
+        name: userData.name,
+        email: userData.email,
+        role: userData.role
+      });
+      setEditDialogOpen(true);
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert(error.message);
+    }
+  };
+  
+  const manageInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+  
+  const manageRoleChange = (value) => {
+    setFormData({
+      ...formData,
+      role: value
+    });
+  };
+  
+  const manageSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!currentUser) return;
+    
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/users/${currentUser.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la mise à jour de l\'utilisateur');
+      }
+      
+      setEditDialogOpen(false);
+      fetchUsers();
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert(error.message);
+    }
   };
 
   const manageDelete = async (userId) => {
@@ -114,11 +208,14 @@ export default function AdminUsers() {
           }
         });
         
+        const data = await response.json();
+        
         if (!response.ok) {
-          throw new Error('Erreur lors de la suppression de l\'utilisateur');
+          throw new Error(data.message || 'Erreur lors de la suppression de l\'utilisateur');
         }
         
         fetchUsers();
+        alert('Utilisateur supprimé avec succès');
       } catch (error) {
         console.error('Erreur:', error);
         alert(error.message);
@@ -133,6 +230,66 @@ export default function AdminUsers() {
           <h1 className="text-2xl md:text-3xl font-bold text-white">Gestion des Utilisateurs</h1>
           <p className="text-white text-opacity-80 text-base md:text-lg">Gérez les utilisateurs de la plateforme, ajoutez de nouveaux utilisateurs et modifiez leurs rôles.</p>
         </div>
+        
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="bg-gray-800 text-white border border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold">Modifier l'utilisateur</DialogTitle>
+            </DialogHeader>
+            
+            <form onSubmit={manageSubmit} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-white">Nom</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={manageInputChange}
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-white">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={manageInputChange}
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="role" className="text-white">Rôle</Label>
+                <Select 
+                  value={formData.role} 
+                  onValueChange={manageRoleChange}
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Sélectionner un rôle" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-700 border-gray-600 text-white">
+                    <SelectItem value="user">Utilisateur</SelectItem>
+                    <SelectItem value="admin">Administrateur</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <DialogFooter className="mt-6">
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" className="bg-transparent border-gray-500 text-white hover:bg-gray-700">
+                    Annuler
+                  </Button>
+                </DialogClose>
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                  Enregistrer
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-lg border border-white border-opacity-20 p-4 md:p-6">
           <div className="flex justify-between md:justify-end items-center mb-4">

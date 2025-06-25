@@ -65,16 +65,17 @@ class UserController extends Controller
     /**
      * Remove the specified user from storage.
      *
-     * @param  string  $id
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        $user = User::findOrFail($id);
+        // Empêcher la suppression de son propre compte
+        if (auth()->id() === $user->id) {
+            return response()->json(['message' => 'Vous ne pouvez pas supprimer votre propre compte'], 403);
+        }
+        
         $user->delete();
-
-        return response()->json([
-            'message' => 'Utilisateur supprimé avec succès'
-        ]);
+        return response()->json(['message' => 'User deleted successfully']);
     }
 }
