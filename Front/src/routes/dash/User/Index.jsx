@@ -47,10 +47,53 @@ export default function UserIndex() {
   ];
 
   useEffect(() => {
-    setTimeout(() => {
-      setUserPlants([]);
-      setLoading(false);
-    }, 1000);
+    const fetchUserPlants = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('access_token');
+        
+        if (!token) {
+          console.error('Aucun token trouvé');
+          setLoading(false);
+          return;
+        }
+        
+        const response = await fetch('http://127.0.0.1:8000/api/user-plants', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data && Array.isArray(data)) {
+          const formattedPlants = data.map(plant => ({
+            id: plant.id,
+            name: plant.name,
+            type: plant.name,
+            lastWatered: plant.last_watered || new Date().toISOString().split('T')[0],
+            wateringFrequency: plant.watering_frequency || 7,
+            nextWatering: calculateNextWatering(plant.last_watered || new Date().toISOString().split('T')[0], plant.watering_frequency || 7),
+            health: getPlantHealth(plant.last_watered || new Date().toISOString().split('T')[0], 
+                      calculateNextWatering(plant.last_watered || new Date().toISOString().split('T')[0], plant.watering_frequency || 7))
+          }));
+          
+          setUserPlants(formattedPlants);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des plantes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUserPlants();
   }, []);
 
   const calculateNextWatering = (lastWatered, frequency) => {
@@ -70,22 +113,99 @@ export default function UserIndex() {
     return 'Attention';
   };
 
-  const markAsWatered = (plantId) => {
-    const today = new Date().toISOString().split('T')[0];
-    setUserPlants(prev => prev.map(plant => {
-      if (plant.id === plantId) {
-        const nextWatering = calculateNextWatering(today, plant.wateringFrequency);
-        const health = getPlantHealth(today, nextWatering);
-        return {
-          ...plant,
-          lastWatered: today,
-          nextWatering: nextWatering,
-          health: health
-        };
+  const markAsWatered = async (plantId) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return;
       }
-      return plant;
-    }));
+      
+      const today = new Date().toISOString().split('T')[0];
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/user-plants/${plantId}/water`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          last_watered: today
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      setUserPlants(prev => prev.map(plant => {
+        if (plant.id === plantId) {
+          const nextWatering = calculateNextWatering(today, plant.wateringFrequency);
+          const health = getPlantHealth(today, nextWatering);
+          return {
+            ...plant,
+            lastWatered: today,
+            nextWatering: nextWatering,
+            health: health
+          };
+        }
+        return plant;
+      }));
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de l\'arrosage:', error);
+      alert('Une erreur est survenue lors de la mise à jour de l\'arrosage. Veuillez réessayer.');
+    }
   };
+  
+  const [availablePlantsLoading, setAvailablePlantsLoading] = useState(false);
+  
+  useEffect(() => {
+    const fetchAvailablePlants = async () => {
+      try {
+        setAvailablePlantsLoading(true);
+        const token = localStorage.getItem('access_token');
+        
+        if (!token) {
+          console.error('Aucun token trouvé');
+          return;
+        }
+        
+        const response = await fetch('http://127.0.0.1:8000/api/plants', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data && Array.isArray(data)) {
+          const apiPlants = data.map(plant => ({
+            id: plant.id,
+            name: plant.name,
+            frequency: plant.watering_frequency || 7
+          }));
+          
+          if (apiPlants.length > 0) {
+            // setAvailablePlants(apiPlants);
+            // TODO : remplacer par les plantes du back
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des plantes disponibles:', error);
+      } finally {
+        setAvailablePlantsLoading(false);
+      }
+    };
+    
+    fetchAvailablePlants();
+  }, []);
 
   const userColumns = [
     {
@@ -143,35 +263,93 @@ export default function UserIndex() {
     }
   ];
 
-  const manageAddPlant = () => {
+  const manageAddPlant = async () => {
     if (!newPlant.name || !newPlant.type || !newPlant.lastWatered) {
       alert('Veuillez remplir tous les champs');
       return;
     }
 
-    const selectedPlantType = availablePlants.find(p => p.id === newPlant.type);
-    const nextWatering = calculateNextWatering(newPlant.lastWatered, selectedPlantType.frequency);
-    const health = getPlantHealth(newPlant.lastWatered, nextWatering);
+    try {
+      const selectedPlantType = availablePlants.find(p => p.id === newPlant.type);
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return;
+      }
+      
+      const plantData = {
+        name: newPlant.name,
+        type: selectedPlantType.name,
+        last_watered: newPlant.lastWatered,
+        watering_frequency: selectedPlantType.frequency
+      };
+      
+      const response = await fetch('http://127.0.0.1:8000/api/user-plants', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(plantData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      const nextWatering = calculateNextWatering(newPlant.lastWatered, selectedPlantType.frequency);
+      const health = getPlantHealth(newPlant.lastWatered, nextWatering);
 
-    const plantToAdd = {
-      id: Date.now(),
-      name: newPlant.name,
-      type: selectedPlantType.name,
-      lastWatered: newPlant.lastWatered,
-      nextWatering: nextWatering,
-      health: health,
-      wateringFrequency: selectedPlantType.frequency
-    };
+      const plantToAdd = {
+        id: data.id || Date.now(),
+        name: newPlant.name,
+        type: selectedPlantType.name,
+        lastWatered: newPlant.lastWatered,
+        nextWatering: nextWatering,
+        health: health,
+        wateringFrequency: selectedPlantType.frequency
+      };
 
-    setUserPlants(prev => [...prev, plantToAdd]);
-    setNewPlant({ name: '', type: '', lastWatered: '', wateringFrequency: 7 });
-    setIsAddPlantDialogOpen(false);
+      setUserPlants(prev => [...prev, plantToAdd]);
+      setNewPlant({ name: '', type: '', lastWatered: '', wateringFrequency: 7 });
+      setIsAddPlantDialogOpen(false);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de la plante:', error);
+      alert('Une erreur est survenue lors de l\'ajout de la plante. Veuillez réessayer.');
+    }
   };
 
-  const manageRemovePlant = (plantId) => {
-    setUserPlants(prev => prev.filter(plant => plant.id !== plantId));
-    setIsDeleteDialogOpen(false);
-    setPlantToDelete(null);
+  const manageRemovePlant = async (plantId) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return;
+      }
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/user-plants/${plantId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      setUserPlants(prev => prev.filter(plant => plant.id !== plantId));
+      setIsDeleteDialogOpen(false);
+      setPlantToDelete(null);
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la plante:', error);
+      alert('Une erreur est survenue lors de la suppression de la plante. Veuillez réessayer.');
+    }
   };
 
   if (loading) {
