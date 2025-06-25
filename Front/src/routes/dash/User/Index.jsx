@@ -28,23 +28,14 @@ export default function UserIndex() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [plantToDelete, setPlantToDelete] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [availablePlantsLoading, setAvailablePlantsLoading] = useState(false);
+  const [availablePlants, setAvailablePlants] = useState([]);
   const [newPlant, setNewPlant] = useState({
     name: '',
     type: '',
     lastWatered: '',
     wateringFrequency: 7
   });
-
-  const availablePlants = [
-    { id: 'monstera', name: 'Monstera deliciosa', frequency: 7 },
-    { id: 'ficus', name: 'Ficus benjamina', frequency: 5 },
-    { id: 'cactus', name: 'Cactus', frequency: 21 },
-    { id: 'pothos', name: 'Pothos', frequency: 7 },
-    { id: 'snake-plant', name: 'Sansevieria', frequency: 14 },
-    { id: 'peace-lily', name: 'Spathiphyllum', frequency: 7 },
-    { id: 'rubber-tree', name: 'Ficus elastica', frequency: 7 },
-    { id: 'philodendron', name: 'Philodendron', frequency: 7 }
-  ];
 
   useEffect(() => {
     const fetchUserPlants = async () => {
@@ -158,8 +149,6 @@ export default function UserIndex() {
     }
   };
   
-  const [availablePlantsLoading, setAvailablePlantsLoading] = useState(false);
-  
   useEffect(() => {
     const fetchAvailablePlants = async () => {
       try {
@@ -185,16 +174,16 @@ export default function UserIndex() {
         
         const data = await response.json();
         
-        if (data && Array.isArray(data)) {
-          const apiPlants = data.map(plant => ({
+        if (data && data.data && Array.isArray(data.data)) {
+          const apiPlants = data.data.map(plant => ({
             id: plant.id,
             name: plant.name,
-            frequency: plant.watering_frequency || 7
+            frequency: plant.watering_frequency || 7,
+            image: plant.image
           }));
           
           if (apiPlants.length > 0) {
-            // setAvailablePlants(apiPlants);
-            // TODO : remplacer par les plantes du back
+            setAvailablePlants(apiPlants);
           }
         }
       } catch (error) {
@@ -417,20 +406,29 @@ export default function UserIndex() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="plant-type">Type de plante</Label>
-                          <Select onValueChange={(value) => setNewPlant(prev => ({ ...prev, type: value }))}>
+                          <Select 
+                            value={newPlant.type}
+                            onValueChange={(value) => setNewPlant(prev => ({ ...prev, type: value }))}
+                          >
                             <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                               <SelectValue placeholder="Sélectionner le type" />
                             </SelectTrigger>
                             <SelectContent className="bg-gray-800 border-gray-700">
-                              {availablePlants.map((plant) => (
-                                <SelectItem 
-                                  key={plant.id} 
-                                  value={plant.id}
-                                  className="text-white hover:bg-gray-700"
-                                >
-                                  {plant.name}
-                                </SelectItem>
-                              ))}
+                              {availablePlantsLoading ? (
+                                <div className="text-center p-2 text-white">Chargement...</div>
+                              ) : availablePlants.length > 0 ? (
+                                availablePlants.map((plant) => (
+                                  <SelectItem 
+                                    key={plant.id} 
+                                    value={plant.id}
+                                    className="text-white hover:bg-gray-700"
+                                  >
+                                    {plant.name}
+                                  </SelectItem>
+                                ))
+                              ) : (
+                                <div className="text-center p-2 text-white">Aucune plante disponible</div>
+                              )}
                             </SelectContent>
                           </Select>
                         </div>
@@ -513,15 +511,21 @@ export default function UserIndex() {
                   <SelectValue placeholder="Sélectionner le type" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
-                  {availablePlants.map((plant) => (
-                    <SelectItem 
-                      key={plant.id} 
-                      value={plant.id}
-                      className="text-white hover:bg-gray-700"
-                    >
-                      {plant.name}
-                    </SelectItem>
-                  ))}
+                  {availablePlantsLoading ? (
+                    <div className="text-center p-2 text-white">Chargement...</div>
+                  ) : availablePlants.length > 0 ? (
+                    availablePlants.map((plant) => (
+                      <SelectItem 
+                        key={plant.id} 
+                        value={plant.id}
+                        className="text-white hover:bg-gray-700"
+                      >
+                        {plant.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="text-center p-2 text-white">Aucune plante disponible</div>
+                  )}
                 </SelectContent>
               </Select>
             </div>
