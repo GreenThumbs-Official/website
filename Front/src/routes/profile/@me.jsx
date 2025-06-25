@@ -121,7 +121,7 @@ export default function ProfileMe() {
           avatar: userData.avatar || prev.avatar,
           joinedDate: userData.created_at || prev.joinedDate,
           role: userData.role || 'user',
-          plantsCount: 0, 
+          plantsCount: prev.plantsCount || 0, 
         };
         
         form.reset({
@@ -284,8 +284,12 @@ export default function ProfileMe() {
   };
 
   useEffect(() => {
-    fetchUserProfile();
-    fetchUserPlants();
+    const loadUserData = async () => {
+      await fetchUserProfile();
+      await fetchUserPlants();
+    };
+    
+    loadUserData();
   }, []);
 
   const onSubmit = async (data) => {
