@@ -47,6 +47,7 @@ export default function AdminAdvices() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    category: 'starter',
   });
   
   const [currentPage, setCurrentPage] = useState(1);
@@ -187,6 +188,7 @@ export default function AdminAdvices() {
     setFormData({
       name: advice.name || '',
       description: advice.description || '',
+      category: advice.category || 'starter',
     });
     setEditDialogOpen(true);
   };
@@ -195,6 +197,7 @@ export default function AdminAdvices() {
     setFormData({
       name: '',
       description: '',
+      category: 'starter',
     });
   };
 
@@ -218,6 +221,15 @@ export default function AdminAdvices() {
         cell: (row) => (
           <div className="max-w-xs truncate">
             {row.description ? row.description.substring(0, 50) + '...' : 'N/A'}
+          </div>
+        )
+      },
+      {
+        header: 'Catégorie',
+        accessor: 'category',
+        cell: (row) => (
+          <div className="capitalize">
+            {row.category || 'starter'}
           </div>
         )
       },
@@ -464,6 +476,25 @@ export default function AdminAdvices() {
                                       className="col-span-3 bg-gray-800 border-gray-700"
                                     />
                                     </div>
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                      <Label htmlFor="category" className="text-right">
+                                        Catégorie
+                                      </Label>
+                                      <Select
+                                        name="category"
+                                        value={formData.category}
+                                        onValueChange={(value) => setFormData({...formData, category: value})}
+                                      >
+                                        <SelectTrigger className="col-span-3 bg-gray-800 border-gray-700">
+                                          <SelectValue placeholder="Sélectionner une catégorie" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                                          <SelectItem value="starter">Débutant</SelectItem>
+                                          <SelectItem value="advanced">Intermédiaire</SelectItem>
+                                          <SelectItem value="pro">Expert</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
                                     </div>
                                               <DialogFooter>
                                                 <DialogClose asChild>
@@ -508,6 +539,25 @@ export default function AdminAdvices() {
                                                     onChange={manageInputChange}
                                                     className="col-span-3 bg-gray-800 border-gray-700"
                                                   />
+                                                </div>
+                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                  <Label htmlFor="edit-category" className="text-right">
+                                                    Catégorie
+                                                  </Label>
+                                                  <Select
+                                                    name="category"
+                                                    value={formData.category}
+                                                    onValueChange={(value) => setFormData({...formData, category: value})}
+                                                  >
+                                                    <SelectTrigger className="col-span-3 bg-gray-800 border-gray-700">
+                                                      <SelectValue placeholder="Sélectionner une catégorie" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                                                      <SelectItem value="starter">Débutant</SelectItem>
+                                                      <SelectItem value="advanced">Intermédiaire</SelectItem>
+                                                      <SelectItem value="pro">Expert</SelectItem>
+                                                    </SelectContent>
+                                                  </Select>
                                                 </div>
                                                  </div>
                                                        

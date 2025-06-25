@@ -27,6 +27,7 @@ class AdvicesController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
+                'category' => 'nullable|string|in:starter,advanced,pro',
             ]);
             $advices = Advices::create($validated);
             return response()->json($advices, 201);
@@ -54,6 +55,7 @@ class AdvicesController extends Controller
             $validated = $request->validate([
                 'name' => 'sometimes|required|string|max:255',
                 'description' => 'nullable|string',
+                'category' => 'nullable|string|in:starter,advanced,pro',
             ]);
             $advices->update($validated);
             return response()->json($advices);

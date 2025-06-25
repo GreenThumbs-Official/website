@@ -35,11 +35,11 @@ export default function TipsShowcase() {
             title: `${(index % 5) + 1}. ${advice.name}`
           };
           
-          if (index % 3 === 0) {
+          if (advice.category === 'starter' || !advice.category) {
             starter.push(numberedAdvice);
-          } else if (index % 3 === 1) {
+          } else if (advice.category === 'advanced') {
             advanced.push(numberedAdvice);
-          } else {
+          } else if (advice.category === 'pro') {
             pro.push(numberedAdvice);
           }
         });
