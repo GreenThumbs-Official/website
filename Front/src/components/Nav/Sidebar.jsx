@@ -7,17 +7,16 @@ export default function Sidebar ({ className, children, userType = 'user', ...pr
   
   const adminMenuItems = [
     { label: 'Dashboard', href: '/dash/Admin', icon: '📊' },
-    { label: 'Plantes', href: '/dash/Plants', icon: '🌱' },
-    { label: 'Utilisateurs', href: '/dash/UserList', icon: '👥' },
-    { label: 'Conseils', href: '/dash/Advices', icon: '👥' },
-    { label: 'Paramètres', href: '/admin/settings', icon: '⚙️' },
+    { label: 'Utilisateurs', href: '/dash/admin/users', icon: '👥' },
+    { label: 'Plantes', href: '/dash/admin/plants', icon: '🌱' },
+    { label: 'Conseils', href: '/dash/admin/advices', icon: '👥' },
   ];
 
   const userMenuItems = [
-    { label: 'Ma Collection', href: '/dashboard', icon: '🌿' },
-    { label: 'Calendrier d\'arrosage', href: '/watering', icon: '💧' },
-    { label: 'Guide de soins', href: '/care-guide', icon: '📖' },
-    { label: 'Mon Profil', href: '/profile', icon: '👤' },
+    { label: 'Ma Collection', href: '/dash/user', icon: '🌿' },
+    { label: 'Calendrier d\'arrosage', href: '/dash/user/watering', icon: '💧' },
+    { label: 'Guide de soins', href: '/dash/user/guide', icon: '📖' },
+    { label: 'Mon Profil', href: '/profile/@me', icon: '👤' },
   ];
 
   const menuItems = userType === 'admin' ? adminMenuItems : userMenuItems;

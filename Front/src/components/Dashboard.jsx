@@ -235,7 +235,7 @@ export function UnifiedDashboard({ isAdmin, ...props }) {
     </div>;
   }
 
-  if (userRole === 'admin') {
+  if (isAdmin) {
     return <Dashboard userType="admin" {...props} />;
   }
   return <Dashboard userType="user" showButton={true} {...props} />;

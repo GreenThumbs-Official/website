@@ -2,7 +2,6 @@ import React from 'react';
 import { UnifiedDashboard } from '@/components/Dashboard';
 
 export default function UserIndex() {
-
   const userData = [
     {
       id: 1,
