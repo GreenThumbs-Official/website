@@ -208,7 +208,7 @@ export default function ProfileMe() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen  bg-[#6fbc29] text-white overflow-hidden">
       <Background />
       <Header />
       
@@ -482,29 +482,6 @@ export default function ProfileMe() {
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
-
-          <Card className="border-primary/20">
-            <CardHeader>
-              <CardTitle className="text-primary flex items-center gap-2">
-                <span>📊</span>
-                Activité récente
-              </CardTitle>
-              <CardDescription>
-                Vos dernières interactions sur GreenThumbs
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <div className="text-6xl mb-4">📈</div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Aucune activité récente
-                </h3>
-                <p className="text-muted-foreground">
-                  Votre activité apparaîtra ici une fois que vous commencerez à interagir avec la communauté.
-                </p>
-              </div>
             </CardContent>
           </Card>
         </div>

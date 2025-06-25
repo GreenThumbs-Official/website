@@ -69,7 +69,7 @@ class AdvicesController extends Controller
      */
     public function destroy(Advice $advices)
     {
-        $plant->delete();
+        $advices->delete();
         return response()->json(['message' => 'Advice deleted successfully']);
     }
 }

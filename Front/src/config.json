@@ -1,6 +1,6 @@
 {
   "api": {
-    "plants": "https://perenual.com/api/v2/species-list?key=sk-7dPj68555c3d615a211096",
+    "plants": "https://perenual.com/api/v2/species-list?key=sk-Sofa685be57e475e411158",
     "weather": {
       "baseUrl": "https://api.tomorrow.io/v4/weather/forecast",
       "apiKey": "ZKj5bwVVSdpMtzqha7CCQzsWJvCHZq3S",

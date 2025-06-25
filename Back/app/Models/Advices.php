@@ -15,6 +15,5 @@ class Advices extends Model
     protected $fillable = [
         'title',
         'description',
-        'category'
     ];
 }
