@@ -273,7 +273,7 @@ export default function WateringCalendar() {
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   locale={fr}
-                  className="text-white"
+                  className="text-black [&_.rdp-day_button]:bg-white [&_.rdp-day_button]:bg-opacity-20 [&_.rdp-day_button]:border [&_.rdp-day_button]:border-white [&_.rdp-day_button]:border-opacity-30 [&_.rdp-day_button]:rounded-md [&_.rdp-button_previous]:bg-white [&_.rdp-button_previous]:bg-opacity-20 [&_.rdp-button_next]:bg-white [&_.rdp-button_next]:bg-opacity-20 [&_.rdp-weekday]:text-black [&_.rdp-caption]:text-black"
                   modifiers={{
                     watering: (date) => hasWateringEvent(date)
                   }}
