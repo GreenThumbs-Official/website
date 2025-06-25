@@ -128,7 +128,7 @@ export default function AdminAdvices() {
         return;
       }
 
-      const response = await fetch(`http://127.0.0.1:8000/api/advice/${currentAdvice.id}`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/advices/${currentAdvice.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -163,7 +163,7 @@ export default function AdminAdvices() {
         return;
       }
 
-      const response = await fetch(`http://127.0.0.1:8000/api/advice/${id}`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/advices/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -517,7 +517,7 @@ export default function AdminAdvices() {
                                                                 Annuler
                                                               </Button>
                                                             </DialogClose>
-                                                            <Button onClick={manageEditAdvice} className="bg-blue-600 hover:bg-blue-700 text-white">
+                                                            <Button onClick={manageEditAdvice} className="bg-green-600 hover:bg-green-700 text-white">
                                                               Mettre à jour
                                                             </Button>
                                                           </DialogFooter>

@@ -65,8 +65,8 @@ Route::get('/advices', [AdvicesController::class, 'index']);
 Route::middleware(['auth:sanctum', 'can:isAdmin'])->group(function () {
 
 Route::post('/advices', [AdvicesController::class, 'store']);
-Route::put('/plants/{plant}', [AdvicesController::class, 'update']);
-Route::delete('/plants/{plant}', [PlantController::class, 'destroy']);
+Route::put('/advices/{advices}', [AdvicesController::class, 'update']);
+Route::delete('/advices/{advices}', [AdvicesController::class, 'destroy']);
 
 });
 
