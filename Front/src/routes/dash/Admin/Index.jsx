@@ -106,36 +106,25 @@ export default function AdminIndex() {
 
   const fetchPlants = async () => {
     try {
+      setLoading(true);
       const response = await fetch('http://127.0.0.1:8000/api/plants');
+      
       if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des plantes');
+        throw new Error(`Erreur HTTP: ${response.status}`);
       }
+      
       const responseData = await response.json();
       const data = responseData.data || responseData;
       const plantsArray = Array.isArray(data) ? data : [];
+      
       setPlantsData(plantsArray);
       setTotalPlantPages(Math.ceil(plantsArray.length / itemsPerPage));
+      setLoading(false);
     } catch (error) {
       console.error('Erreur:', error);
-      const mockData = [
-        {
-          id: 1,
-          name: 'Monstera Deliciosa',
-          category: 'Plante d\'intérieur',
-        },
-        {
-          id: 2,
-          name: 'Ficus Benjamina',
-          category: 'Plante d\'intérieur',
-        },
-        {
-          id: 3,
-          name: 'Cactus Barrel',
-          category: 'Succulente',
-        }
-      ];
-      setPlantsData(mockData);
-      setTotalPlantPages(Math.ceil(mockData.length / itemsPerPage));
+      setError(error.message);
+      setPlantsData([]);
+      setLoading(false);
     }
   };
 
@@ -428,23 +417,54 @@ export default function AdminIndex() {
                   <TableHeader>
                     <TableRow className="border-b border-white border-opacity-20">
                       <TableHead className="text-white">Nom</TableHead>
-                      <TableHead className="text-white">Catégorie</TableHead>
-                      <TableHead className="text-white">Stock</TableHead>
+                      <TableHead className="text-white">Origine</TableHead>
+                      <TableHead className="text-white">Mois de production</TableHead>
+                      <TableHead className="text-white">Temp. (°C)</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Array.isArray(plantsData) && plantsData.length > 0 ? plantsData
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center text-white text-opacity-60 py-4">
+                          Chargement des données...
+                        </TableCell>
+                      </TableRow>
+                    ) : error ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center text-white text-opacity-60 py-4">
+                          Erreur: {error}
+                        </TableCell>
+                      </TableRow>
+                    ) : Array.isArray(plantsData) && plantsData.length > 0 ? plantsData
                       .slice((currentPlantPage - 1) * itemsPerPage, currentPlantPage * itemsPerPage)
                       .map((plant) => (
                         <TableRow key={plant.id} className="border-b border-white border-opacity-10">
                           <TableCell className="text-white">{plant.name}</TableCell>
-                          <TableCell className="text-white">{plant.category}</TableCell>
-                          <TableCell className="text-white">{plant.stock}</TableCell>
+                          <TableCell className="text-white">{plant.origin || 'Non spécifié'}</TableCell>
+                          <TableCell className="text-white">
+                            {plant.fruit_production_month ? (
+                              (() => {
+                                const months = [
+                                  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                                  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+                                ];
+                                return months[parseInt(plant.fruit_production_month) - 1] || 'Non spécifié';
+                              })()
+                            ) : 'Non spécifié'}
+                          </TableCell>
+                          <TableCell className="text-white">
+                            {plant.min_temp && plant.max_temp ? 
+                              `${plant.min_temp} - ${plant.max_temp}` : 
+                              plant.min_temp ? 
+                                `Min: ${plant.min_temp}` : 
+                                plant.max_temp ? 
+                                  `Max: ${plant.max_temp}` : 'Non spécifié'}
+                          </TableCell>
                         </TableRow>
                       ))
                     : (
                       <TableRow>
-                        <TableCell colSpan={3} className="text-center text-white text-opacity-60 py-4">
+                        <TableCell colSpan={4} className="text-center text-white text-opacity-60 py-4">
                           Aucune plante trouvée
                         </TableCell>
                       </TableRow>
@@ -496,12 +516,20 @@ export default function AdminIndex() {
                   </PaginationContent>
                 </Pagination>
                 
-                <Button 
-                  onClick={() => navigate('/dash/admin/plants')} 
-                  className="mt-4 w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30"
-                >
-                  Voir toutes les plantes
-                </Button>
+                <div className="flex gap-2 mt-4">
+                  <Button 
+                    onClick={() => navigate('/dash/admin/plants')} 
+                    className="flex-1 bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30"
+                  >
+                    Voir toutes
+                  </Button>
+                  <Button 
+                    onClick={() => navigate('/dash/admin/plants')} 
+                    className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+                  >
+                    Ajouter
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
