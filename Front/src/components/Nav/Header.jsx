@@ -1,6 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Header() {
+  const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const accessToken = localStorage.getItem('access_token');
+      const userData = localStorage.getItem('user');
+      
+      if (accessToken && userData) {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        setIsAdmin(parsedUser.role === 'admin');
+      } else {
+        setUser(null);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAuth();
+    window.addEventListener('storage', checkAuth);
+    
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, []);
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-4 py-2">
       <nav className="max-w-6xl mx-auto flex justify-between items-center p-4 rounded-full bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
@@ -15,6 +41,12 @@ export default function Header() {
           <a href="/plants" className="hover:text-gray-200 transition-colors">Plantes</a>
           <a href="/plants/advices" className="hover:text-gray-200 transition-colors">Nos conseils</a>
           <a href="/contact" className="hover:text-gray-200 transition-colors">Contact</a>
+          {user && (
+            <a href="/dash/user" className="hover:text-gray-200 transition-colors">Dashboard</a>
+          )}
+          {isAdmin && (
+            <a href="/dash/admin" className="hover:text-gray-200 transition-colors">Dashboard Admin</a>
+          )}
         </div>
       </nav>
     </header>
