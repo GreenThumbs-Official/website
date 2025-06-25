@@ -34,12 +34,15 @@ export default function AdminUsers() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: ''
+    role: '',
+    password: '',
+    password_confirmation: ''
   });
 
   useEffect(() => {
@@ -140,7 +143,44 @@ export default function AdminUsers() {
   ];
 
   const manageAddUser = () => {
-    alert('Ajouter un nouvel utilisateur');
+    setCurrentUser(null);
+    setFormData({
+      name: '',
+      email: '',
+      role: 'user',
+      password: '',
+      password_confirmation: ''
+    });
+    setAddDialogOpen(true);
+  };
+  
+  const manageAddSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/users`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erreur lors de la création de l\'utilisateur');
+      }
+      
+      setAddDialogOpen(false);
+      fetchUsers();
+      alert('Utilisateur créé avec succès');
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert(error.message);
+    }
   };
 
   const manageEdit = async (userId) => {
@@ -307,6 +347,94 @@ export default function AdminUsers() {
                 </DialogClose>
                 <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
                   Enregistrer
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+        
+        <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+          <DialogContent className="bg-gray-800 text-white border border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold">Ajouter un utilisateur</DialogTitle>
+            </DialogHeader>
+            
+            <form onSubmit={manageAddSubmit} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="add-name" className="text-white">Nom</Label>
+                <Input
+                  id="add-name"
+                  name="name"
+                  value={formData.name}
+                  onChange={manageInputChange}
+                  className="bg-gray-700 border-gray-600 text-white"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="add-email" className="text-white">Email</Label>
+                <Input
+                  id="add-email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={manageInputChange}
+                  className="bg-gray-700 border-gray-600 text-white"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="add-password" className="text-white">Mot de passe</Label>
+                <Input
+                  id="add-password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={manageInputChange}
+                  className="bg-gray-700 border-gray-600 text-white"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="add-password-confirmation" className="text-white">Confirmer le mot de passe</Label>
+                <Input
+                  id="add-password-confirmation"
+                  name="password_confirmation"
+                  type="password"
+                  value={formData.password_confirmation}
+                  onChange={manageInputChange}
+                  className="bg-gray-700 border-gray-600 text-white"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="add-role" className="text-white">Rôle</Label>
+                <Select 
+                  value={formData.role} 
+                  onValueChange={manageRoleChange}
+                >
+                  <SelectTrigger id="add-role" className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Sélectionner un rôle" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-700 border-gray-600 text-white">
+                    <SelectItem value="user">Utilisateur</SelectItem>
+                    <SelectItem value="admin">Administrateur</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <DialogFooter className="mt-6">
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" className="bg-transparent border-gray-500 text-white hover:bg-gray-700">
+                    Annuler
+                  </Button>
+                </DialogClose>
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                  Créer
                 </Button>
               </DialogFooter>
             </form>
