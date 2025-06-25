@@ -290,79 +290,86 @@ export default function UserIndex() {
   }
 
   return (
-    <UnifiedDashboard
-      isAdmin={false}
-      title="Ma Collection de Plantes"
-      description="Suivez vos plantes, leurs besoins d'arrosage et leur état de santé."
-      data={userPlants}
-      columns={userColumns}
-      buttonText="Ajouter une plante"
-      onButtonClick={() => setIsAddPlantDialogOpen(true)}
-      additionalContent={
-        <Dialog open={isAddPlantDialogOpen} onOpenChange={setIsAddPlantDialogOpen}>
-          <DialogContent className="bg-gray-900 text-white border-gray-700 max-w-md">
-            <DialogHeader>
-              <DialogTitle>Ajouter une nouvelle plante</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="plant-name">Nom de votre plante</Label>
-                <Input
-                  id="plant-name"
-                  placeholder="Ex: Mon Monstera"
-                  value={newPlant.name}
-                  onChange={(e) => setNewPlant(prev => ({ ...prev, name: e.target.value }))}
-                  className="bg-gray-800 border-gray-700 text-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="plant-type">Type de plante</Label>
-                <Select onValueChange={(value) => setNewPlant(prev => ({ ...prev, type: value }))}>
-                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                    <SelectValue placeholder="Sélectionner le type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700">
-                    {availablePlants.map((plant) => (
-                      <SelectItem 
-                        key={plant.id} 
-                        value={plant.id}
-                        className="text-white hover:bg-gray-700"
-                      >
-                        {plant.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="last-watered">Dernier arrosage</Label>
-                <Input
-                  id="last-watered"
-                  type="date"
-                  value={newPlant.lastWatered}
-                  onChange={(e) => setNewPlant(prev => ({ ...prev, lastWatered: e.target.value }))}
-                  className="bg-gray-800 border-gray-700 text-white"
-                />
-              </div>
+    <>
+      <UnifiedDashboard
+        isAdmin={false}
+        title="Ma Collection de Plantes"
+        description="Suivez vos plantes, leurs besoins d'arrosage et leur état de santé."
+        data={userPlants}
+        columns={userColumns}
+        buttonText="Ajouter une plante"
+        onButtonClick={() => setIsAddPlantDialogOpen(true)}
+      />
+      
+      <Dialog open={isAddPlantDialogOpen} onOpenChange={setIsAddPlantDialogOpen}>
+        <DialogContent className="bg-gray-900 text-white border-gray-700 max-w-md">
+          <DialogHeader>
+            <DialogTitle>Ajouter une nouvelle plante</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="plant-name">Nom de votre plante</Label>
+              <Input
+                id="plant-name"
+                placeholder="Ex: Mon Monstera"
+                value={newPlant.name}
+                onChange={(e) => setNewPlant(prev => ({ ...prev, name: e.target.value }))}
+                className="bg-gray-800 border-gray-700 text-white"
+              />
             </div>
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsAddPlantDialogOpen(false)}
-                className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+            <div className="space-y-2">
+              <Label htmlFor="plant-type">Type de plante</Label>
+              <Select 
+                value={newPlant.type}
+                onValueChange={(value) => setNewPlant(prev => ({ ...prev, type: value }))}
               >
-                Annuler
-              </Button>
-              <Button 
-                onClick={manageAddPlant}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                Ajouter
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      }
-    />
+                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                  <SelectValue placeholder="Sélectionner le type" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  {availablePlants.map((plant) => (
+                    <SelectItem 
+                      key={plant.id} 
+                      value={plant.id}
+                      className="text-white hover:bg-gray-700"
+                    >
+                      {plant.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="last-watered">Dernier arrosage</Label>
+              <Input
+                id="last-watered"
+                type="date"
+                value={newPlant.lastWatered}
+                onChange={(e) => setNewPlant(prev => ({ ...prev, lastWatered: e.target.value }))}
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsAddPlantDialogOpen(false);
+                setNewPlant({ name: '', type: '', lastWatered: '', wateringFrequency: 7 });
+              }}
+              className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+            >
+              Annuler
+            </Button>
+            <Button 
+              onClick={manageAddPlant}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              Ajouter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
