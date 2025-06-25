@@ -264,6 +264,7 @@ export default function UserIndex() {
                             value={newPlant.lastWatered}
                             onChange={(e) => setNewPlant(prev => ({ ...prev, lastWatered: e.target.value }))}
                             className="bg-gray-800 border-gray-700 text-white"
+                            max={new Date().toISOString().split('T')[0]}
                           />
                         </div>
                       </div>
@@ -354,6 +355,7 @@ export default function UserIndex() {
                 value={newPlant.lastWatered}
                 onChange={(e) => setNewPlant(prev => ({ ...prev, lastWatered: e.target.value }))}
                 className="bg-gray-800 border-gray-700 text-white"
+                max={new Date().toISOString().split('T')[0]}
               />
             </div>
           </div>
