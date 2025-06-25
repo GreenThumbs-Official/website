@@ -67,7 +67,7 @@ export default function UserIndex() {
           const formattedPlants = data.map(plant => ({
             id: plant.id,
             name: plant.name,
-            type: plant.name,
+            type: plant.type || plant.name, 
             lastWatered: plant.last_watered || new Date().toISOString().split('T')[0],
             wateringFrequency: plant.watering_frequency || 7,
             nextWatering: calculateNextWatering(plant.last_watered || new Date().toISOString().split('T')[0], plant.watering_frequency || 7),

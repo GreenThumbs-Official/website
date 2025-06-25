@@ -21,7 +21,8 @@ class UserPlantController extends Controller
         $formattedPlants = $plants->map(function ($plant) {
             return [
                 'id' => $plant->id,
-                'name' => $plant->name,
+                'name' => $plant->pivot->custom_name ?? $plant->name, 
+                'type' => $plant->name, 
                 'description' => $plant->description,
                 'image' => $plant->image,
                 'origin' => $plant->origin,
@@ -85,6 +86,7 @@ class UserPlantController extends Controller
                 $user->favoritePlants()->updateExistingPivot($plant->id, [
                     'last_watered' => $validated['last_watered'],
                     'watering_frequency' => $validated['watering_frequency'],
+                    'custom_name' => $validated['name'], 
                 ]);
             } else {
                 \Log::info('Ajout de la plante à la collection de l\'utilisateur');
@@ -93,6 +95,7 @@ class UserPlantController extends Controller
                 $user->favoritePlants()->attach($plant->id, [
                     'last_watered' => $validated['last_watered'],
                     'watering_frequency' => $validated['watering_frequency'],
+                    'custom_name' => $validated['name'],
                 ]);
             }
             
