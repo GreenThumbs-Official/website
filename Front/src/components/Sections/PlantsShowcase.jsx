@@ -24,7 +24,7 @@ const products = [
   
 ];
 
-export default function ProductShowcase() {
+export default function PlantsShowcase() {
   return (
     <section id="products" className="py-16 px-4">
       <div className="max-w-6xl mx-auto">
