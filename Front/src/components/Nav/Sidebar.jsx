@@ -6,10 +6,9 @@ export default function Sidebar ({ className, children, userType = 'user', ...pr
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const adminMenuItems = [
-    { label: 'Dashboard', href: '/admin', icon: '📊' },
-    { label: 'Plantes', href: '/admin/plants', icon: '🌱' },
-    { label: 'Utilisateurs', href: '/admin/users', icon: '👥' },
-    { label: 'Paramètres', href: '/admin/settings', icon: '⚙️' },
+    { label: 'Dashboard', href: '/dash/admin', icon: '📊' },
+    { label: 'Plantes', href: '/dash/admin/plants', icon: '🌱' },
+    { label: 'Utilisateurs', href: '/dash/admin/users', icon: '👥' },
   ];
 
   const userMenuItems = [
