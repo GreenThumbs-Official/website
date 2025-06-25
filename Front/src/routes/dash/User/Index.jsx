@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Sidebar from '@/components/Nav/Sidebar';
-import { Plus, Leaf, Calendar, Droplets } from 'lucide-react';
+import { Plus, Leaf, Calendar, Droplets, Trash2, CheckCircle } from 'lucide-react';
 
 export default function UserIndex() {
   const [userPlants, setUserPlants] = useState([]);
@@ -68,6 +68,23 @@ export default function UserIndex() {
     return 'Attention';
   };
 
+  const markAsWatered = (plantId) => {
+    const today = new Date().toISOString().split('T')[0];
+    setUserPlants(prev => prev.map(plant => {
+      if (plant.id === plantId) {
+        const nextWatering = calculateNextWatering(today, plant.wateringFrequency);
+        const health = getPlantHealth(today, nextWatering);
+        return {
+          ...plant,
+          lastWatered: today,
+          nextWatering: nextWatering,
+          health: health
+        };
+      }
+      return plant;
+    }));
+  };
+
   const userColumns = [
     {
       header: 'Plante',
@@ -91,6 +108,32 @@ export default function UserIndex() {
         }`}>
           {row.health}
         </span>
+      )
+    },
+    {
+      header: 'Actions',
+      cell: (row) => (
+        <div className="flex space-x-2">
+          <Button
+            size="sm"
+            onClick={() => markAsWatered(row.id)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs"
+            title="Marquer comme arrosé"
+          >
+            <Droplets className="w-3 h-3 mr-1" />
+            Arroser
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => manageRemovePlant(row.id)}
+            className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 text-xs"
+            title="Supprimer la plante"
+          >
+            <Trash2 className="w-3 h-3 mr-1" />
+            Supprimer
+          </Button>
+        </div>
       )
     }
   ];
@@ -120,7 +163,7 @@ export default function UserIndex() {
     setIsAddPlantDialogOpen(false);
   };
 
-  const handleRemovePlant = (plantId) => {
+  const manageRemovePlant = (plantId) => {
     setUserPlants(prev => prev.filter(plant => plant.id !== plantId));
   };
 
