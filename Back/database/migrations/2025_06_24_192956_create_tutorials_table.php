@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('tutorials', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->ulid('plant_id')->index();
+            $table->ulid('plant_id')->index()->unique();
             $table->foreign('plant_id')->references('id')->on('plants')->onDelete('cascade');
-            $table->json('steps');
+            $table->json('tutorial');
             $table->timestamps();
         });
     }

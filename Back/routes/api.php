@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TutorialController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\IntrestController;
@@ -40,6 +41,8 @@ Route::middleware(['auth:sanctum', 'can:isAdmin'])->group(function () {
     Route::put('/plants/{plant}', [PlantController::class, 'update']);
     Route::delete('/plants/{plant}', [PlantController::class, 'destroy']);
 });
+
+Route::apiResource('tutorials', TutorialController::class)->only(['store', 'show']);
 
 Route::post('/handle-prompt', [GeminiController::class, 'handlePrompt']);
 
