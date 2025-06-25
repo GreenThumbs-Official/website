@@ -29,7 +29,7 @@ class AdvicesController extends Controller
                 'description' => 'nullable|string',
             ]);
             $advices = Advices::create($validated);
-            return response()->json($plant, 201);
+            return response()->json($advices, 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => 'Validation failed', 'details' => $e->errors()], 422);
         } catch (\Exception $e) {
@@ -40,7 +40,7 @@ class AdvicesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Advice $advices)
+    public function show(Advices $advices)
     {
         return response()->json($advices);
     }
@@ -67,7 +67,7 @@ class AdvicesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Advice $advices)
+    public function destroy(Advices $advices)
     {
         $advices->delete();
         return response()->json(['message' => 'Advice deleted successfully']);
