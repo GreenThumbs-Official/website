@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Nav/Sidebar';
 import {
   Table,
@@ -11,31 +11,54 @@ import {
 import { Button } from '@/components/ui/button';
 
 export default function AdminUsers() {
-  const Data = [
-    {
-      id: 1,
-      name: 'Jean Dupont',
-      email: 'jean.dupont@example.com',
-      role: 'Utilisateur',
-    },
-    {
-      id: 2,
-      name: 'Marie Martin',
-      email: 'marie.martin@example.com',
-      role: 'Administrateur',
-    },
-    {
-      id: 3,
-      name: 'Pierre Durand',
-      email: 'pierre.durand@example.com',
-      role: 'Utilisateur',
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [currentPage]);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        setError('Vous devez être connecté pour accéder à cette page');
+        setLoading(false);
+        return;
+      }
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/users?page=${currentPage}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des utilisateurs');
+      }
+      
+      const data = await response.json();
+      setUsers(data.data);
+      setTotalPages(data.last_page);
+      setLoading(false);
+    } catch (error) {
+      console.error('Erreur:', error);
+      setError(error.message);
+      setLoading(false);
     }
-  ];
+  };
 
   const columns = [
     {
       header: 'ID',
-      accessor: 'id'
+      accessor: (row) => row.id.substring(0, 8) + '...' 
     },
     {
       header: 'Nom',
@@ -53,10 +76,16 @@ export default function AdminUsers() {
       header: 'Actions',
       cell: (row) => (
         <div className="flex gap-2">
-          <button className="text-blue-300 hover:text-blue-200 text-sm">
+          <button 
+            className="text-blue-300 hover:text-blue-200 text-sm"
+            onClick={() => manageEdit(row.id)}
+          >
             Modifier
           </button>
-          <button className="text-red-300 hover:text-red-200 text-sm">
+          <button 
+            className="text-red-300 hover:text-red-200 text-sm"
+            onClick={() => manageDelete(row.id)}
+          >
             Supprimer
           </button>
         </div>
@@ -66,6 +95,35 @@ export default function AdminUsers() {
 
   const manageAddUser = () => {
     alert('Ajouter un nouvel utilisateur');
+  };
+
+  const manageEdit = (userId) => {
+    alert(`User ID: ${userId}`);
+  };
+
+  const manageDelete = async (userId) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+      try {
+        const token = localStorage.getItem('access_token');
+        
+        const response = await fetch(`http://127.0.0.1:8000/api/users/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Erreur lors de la suppression de l\'utilisateur');
+        }
+        
+        fetchUsers();
+      } catch (error) {
+        console.error('Erreur:', error);
+        alert(error.message);
+      }
+    }
   };
 
   return (
@@ -102,8 +160,20 @@ export default function AdminUsers() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {Data.length > 0 ? (
-                  Data.map((row, rowIndex) => (
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="text-center text-white text-opacity-60 py-8">
+                      Chargement des données...
+                    </TableCell>
+                  </TableRow>
+                ) : error ? (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="text-center text-white text-opacity-60 py-8">
+                      Erreur: {error}
+                    </TableCell>
+                  </TableRow>
+                ) : users.length > 0 ? (
+                  users.map((row, rowIndex) => (
                     <TableRow
                       key={rowIndex}
                       className="border-b border-white border-opacity-10 hover:bg-white hover:bg-opacity-10"
@@ -130,8 +200,16 @@ export default function AdminUsers() {
           </div>
 
           <div className="md:hidden space-y-3">
-            {Data.length > 0 ? (
-              Data.map((row, rowIndex) => (
+            {loading ? (
+              <div className="bg-white bg-opacity-20 rounded-lg p-8 text-center">
+                <p className="text-white text-opacity-60">Chargement des données...</p>
+              </div>
+            ) : error ? (
+              <div className="bg-white bg-opacity-20 rounded-lg p-8 text-center">
+                <p className="text-white text-opacity-60">Erreur: {error}</p>
+              </div>
+            ) : users.length > 0 ? (
+              users.map((row, rowIndex) => (
                 <div
                   key={rowIndex}
                   className="bg-white bg-opacity-20 rounded-lg p-4 space-y-2"
@@ -154,6 +232,28 @@ export default function AdminUsers() {
               </div>
             )}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-4 gap-2">
+              <Button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1 || loading}
+                className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white"
+              >
+                Précédent
+              </Button>
+              <span className="text-white self-center">
+                Page {currentPage} sur {totalPages}
+              </span>
+              <Button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages || loading}
+                className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white"
+              >
+                Suivant
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </Sidebar>
