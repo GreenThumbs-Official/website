@@ -25,6 +25,8 @@ import { Plus, Leaf, Calendar, Droplets, Trash2, CheckCircle } from 'lucide-reac
 export default function UserIndex() {
   const [userPlants, setUserPlants] = useState([]);
   const [isAddPlantDialogOpen, setIsAddPlantDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [plantToDelete, setPlantToDelete] = useState(null);
   const [loading, setLoading] = useState(true);
   const [newPlant, setNewPlant] = useState({
     name: '',
@@ -126,7 +128,10 @@ export default function UserIndex() {
           <Button
             size="sm"
             variant="destructive"
-            onClick={() => manageRemovePlant(row.id)}
+            onClick={() => {
+              setPlantToDelete(row);
+              setIsDeleteDialogOpen(true);
+            }}
             className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 text-xs"
             title="Supprimer la plante"
           >
@@ -165,6 +170,8 @@ export default function UserIndex() {
 
   const manageRemovePlant = (plantId) => {
     setUserPlants(prev => prev.filter(plant => plant.id !== plantId));
+    setIsDeleteDialogOpen(false);
+    setPlantToDelete(null);
   };
 
   if (loading) {
@@ -366,6 +373,40 @@ export default function UserIndex() {
               className="bg-green-600 hover:bg-green-700 text-white"
             >
               Ajouter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="bg-gray-900 text-white border-gray-700 max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-white text-opacity-90">
+              Êtes-vous sûr de vouloir supprimer {plantToDelete?.name} de votre collection ?
+            </p>
+            <p className="text-white text-opacity-70 text-sm mt-2">
+              Cette action est irréversible et toutes les données associées à cette plante seront perdues.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setPlantToDelete(null);
+              }}
+              className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+            >
+              Annuler
+            </Button>
+            <Button 
+              onClick={() => plantToDelete && manageRemovePlant(plantToDelete.id)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Supprimer
             </Button>
           </DialogFooter>
         </DialogContent>
