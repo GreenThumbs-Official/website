@@ -7,8 +7,8 @@ export default function Sidebar ({ className, children, userType = 'user', ...pr
   
   const adminMenuItems = [
     { label: 'Dashboard', href: '/dash/admin', icon: '📊' },
-    { label: 'Plantes', href: '/dash/admin/plants', icon: '🌱' },
     { label: 'Utilisateurs', href: '/dash/admin/users', icon: '👥' },
+    { label: 'Plantes', href: '/dash/admin/plants', icon: '🌱' },
   ];
 
   const userMenuItems = [

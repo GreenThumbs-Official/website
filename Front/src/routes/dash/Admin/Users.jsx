@@ -35,11 +35,24 @@ export default function AdminUsers() {
   const [totalPages, setTotalPages] = useState(1);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [loggedInUser, setLoggedInUser] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     role: ''
   });
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        setLoggedInUser(user);
+      } catch (e) {
+        console.error('Erreur lors du parsing :', e);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     fetchUsers();
@@ -98,22 +111,31 @@ export default function AdminUsers() {
     },
     {
       header: 'Actions',
-      cell: (row) => (
-        <div className="flex gap-2">
-          <button 
-            className="text-blue-300 hover:text-blue-200 text-sm"
-            onClick={() => manageEdit(row.id)}
-          >
-            Modifier
-          </button>
-          <button 
-            className="text-red-300 hover:text-red-200 text-sm"
-            onClick={() => manageDelete(row.id)}
-          >
-            Supprimer
-          </button>
-        </div>
-      )
+      cell: (row) => {
+        const isCurrentUser = loggedInUser && loggedInUser.id === row.id;
+        return (
+          <div className="flex gap-2">
+            <button 
+              className="text-blue-300 hover:text-blue-200 text-sm"
+              onClick={() => manageEdit(row.id)}
+            >
+              Modifier
+            </button>
+            <button 
+              className={`text-sm ${
+                isCurrentUser 
+                  ? 'text-gray-500 cursor-not-allowed' 
+                  : 'text-red-300 hover:text-red-200'
+              }`}
+              onClick={() => !isCurrentUser && manageDelete(row.id)}
+              disabled={isCurrentUser}
+              title={isCurrentUser ? 'Vous ne pouvez pas vous supprimer vous-même' : 'Supprimer cet utilisateur'}
+            >
+              Supprimer
+            </button>
+          </div>
+        );
+      }
     }
   ];
 
