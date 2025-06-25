@@ -1,7 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 export default function ChatBot() {
     const [open, setOpen] = useState(false);
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const sendMessage = async (e) => {
+        e.preventDefault();
+        if (!input.trim()) return;
+
+        const userMessage = { text: input, sender: 'user' };
+        setMessages(prev => [...prev, userMessage]);
+        setInput('');
+        setIsLoading(true);
+
+        try {
+            const response = await fetch('http://127.0.0.1/api/handle-prompt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt: input,
+                    instructions: 'Tu es un assistant de jardinage qui aide les utilisateurs à prendre soin de leurs plantes. Réponds de manière concise et utile.',
+                    response_syntax: 'text'
+                }),
+            });
+
+            const data = await response.json();
+            
+            const botMessage = { 
+                text: data.response || data.clean_response || 'Désolé, je n\'ai pas pu traiter votre demande.', 
+                sender: 'bot' 
+            };
+            setMessages(prev => [...prev, botMessage]);
+        } catch (error) {
+            console.error('Erreur lors de l\'envoi du message:', error);
+            const errorMessage = { 
+                text: 'Désolé, une erreur s\'est produite. Veuillez réessayer.', 
+                sender: 'bot' 
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="chat-bot">
@@ -25,16 +78,46 @@ export default function ChatBot() {
                         </button>
                     </div>
                     <div className="flex-1 p-4 overflow-y-auto">
+                        {messages.map((message, index) => (
+                            <div 
+                                key={index} 
+                                className={`mb-3 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}
+                            >
+                                <div 
+                                    className={`inline-block px-3 py-2 rounded-lg ${message.sender === 'user' 
+                                        ? 'bg-[#6fbc29] text-white rounded-br-none' 
+                                        : 'bg-gray-200 text-gray-800 rounded-bl-none'}`}
+                                >
+                                    {message.text}
+                                </div>
+                            </div>
+                        ))}
+                        {isLoading && (
+                            <div className="text-left mb-3">
+                                <div className="inline-block px-3 py-2 rounded-lg bg-gray-200 text-gray-800 rounded-bl-none">
+                                    <div className="flex space-x-1">
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        <div ref={messagesEndRef} />
                     </div>
-                    <form className="p-4 border-t flex gap-2"> 
+                    <form onSubmit={sendMessage} className="p-4 border-t flex gap-2"> 
                         <input
                             type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
                             placeholder="Votre message..."
                             className="flex-1 border rounded px-3 py-2 focus:outline-none min-w-0"
+                            disabled={isLoading}
                         />
                         <button
                             type="submit"
-                            className="shrink-0 bg-[#6fbc29] text-white px-4 py-2 rounded hover:bg-[#5aa31f] transition"
+                            className={`shrink-0 ${isLoading ? 'bg-gray-400' : 'bg-[#6fbc29] hover:bg-[#5aa31f]'} text-white px-4 py-2 rounded transition`}
+                            disabled={isLoading}
                         >
                             Envoyer
                         </button>
