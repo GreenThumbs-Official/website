@@ -42,10 +42,10 @@ export default function Header() {
           <a href="/plants/advices" className="hover:text-gray-200 transition-colors">Nos conseils</a>
           <a href="/contact" className="hover:text-gray-200 transition-colors">Contact</a>
           {user && (
-            <a href="/dash/User" className="hover:text-gray-200 transition-colors">Dashboard</a>
+            <a href="/dash/user" className="hover:text-gray-200 transition-colors">Dashboard</a>
           )}
           {isAdmin && (
-            <a href="/dash/Admin" className="hover:text-gray-200 transition-colors">Dashboard Admin</a>
+            <a href="/dash/admin" className="hover:text-gray-200 transition-colors">Dashboard Admin</a>
           )}
         </div>
       </nav>
