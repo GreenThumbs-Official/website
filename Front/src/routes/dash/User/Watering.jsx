@@ -36,28 +36,36 @@ export default function WateringCalendar() {
       name: 'Mon Monstera',
       wateringFrequency: 7, // jours
       lastWatered: '2025-06-25',
-      image: '/api/placeholder/150/150'
+      image: '/api/placeholder/150/150',
+      growthProgress: 65, 
+      growthStage: 'Mature' 
     },
     {
       id: 2,
       name: 'Mon Ficus',
       wateringFrequency: 5,
       lastWatered: '2025-06-25',
-      image: '/api/placeholder/150/150'
+      image: '/api/placeholder/150/150',
+      growthProgress: 30,
+      growthStage: 'Jeune'
     },
     {
       id: 3,
       name: 'Mon Cactus',
       wateringFrequency: 14,
       lastWatered: '2025-06-25',
-      image: '/api/placeholder/150/150'
+      image: '/api/placeholder/150/150',
+      growthProgress: 85,
+      growthStage: 'Mature'
     },
     {
       id: 4,
       name: 'Ma Pothos',
       wateringFrequency: 6,
       lastWatered: '2025-06-25',
-      image: '/api/placeholder/150/150'
+      image: '/api/placeholder/150/150',
+      growthProgress: 45,
+      growthStage: 'En croissance'
     }
   ];
 
@@ -115,6 +123,36 @@ export default function WateringCalendar() {
           : event
       )
     );
+    
+    if (selectedPlant) {
+      setPlants(prev => 
+        prev.map(plant => {
+          if (plant.id === selectedPlant.id) {
+            const newProgress = Math.min(plant.growthProgress + 5, 100);
+            
+            let growthStage = plant.growthStage;
+            if (newProgress < 30) growthStage = 'Jeune';
+            else if (newProgress < 70) growthStage = 'En croissance';
+            else growthStage = 'Mature';
+            
+            return {
+              ...plant,
+              growthProgress: newProgress,
+              growthStage: growthStage
+            };
+          }
+          return plant;
+        })
+      );
+      
+      setSelectedPlant(prev => ({
+        ...prev,
+        growthProgress: Math.min(prev.growthProgress + 5, 100),
+        growthStage: prev.growthProgress + 5 < 30 ? 'Jeune' : 
+                    prev.growthProgress + 5 < 70 ? 'En croissance' : 
+                    'Mature'
+      }));
+    }
   };
 
   const getUpcomingWaterings = () => {
@@ -236,20 +274,48 @@ export default function WateringCalendar() {
           </CardHeader>
           <CardContent>
             {selectedPlant ? (
-              <div className="flex items-center space-x-4">
-                <img 
-                  src={selectedPlant.image} 
-                  alt={selectedPlant.name}
-                  className="w-16 h-16 rounded-lg object-cover"
-                />
-                <div>
-                  <h3 className="text-white font-semibold">{selectedPlant.name}</h3>
-                  <p className="text-white text-opacity-70">
-                    Arrosage tous les {selectedPlant.wateringFrequency} jours
-                  </p>
-                  <p className="text-white text-opacity-70 text-sm">
-                    Dernier arrosage : {format(parseISO(selectedPlant.lastWatered), 'dd MMMM yyyy', { locale: fr })}
-                  </p>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-4">
+                  <img 
+                    src={selectedPlant.image} 
+                    alt={selectedPlant.name}
+                    className="w-16 h-16 rounded-lg object-cover"
+                  />
+                  <div>
+                    <h3 className="text-white font-semibold">{selectedPlant.name}</h3>
+                    <p className="text-white text-opacity-70">
+                      Arrosage tous les {selectedPlant.wateringFrequency} jours
+                    </p>
+                    <p className="text-white text-opacity-70 text-sm">
+                      Dernier arrosage : {format(parseISO(selectedPlant.lastWatered), 'dd MMMM yyyy', { locale: fr })}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mt-4">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-white text-sm font-medium">Progression de croissance</span>
+                    <span className="text-white text-sm font-medium">{selectedPlant.growthProgress}%</span>
+                  </div>
+                  <div className="w-full bg-white bg-opacity-20 rounded-full h-2.5">
+                    <div 
+                      className="h-2.5 rounded-full" 
+                      style={{
+                        width: `${selectedPlant.growthProgress}%`,
+                        backgroundColor: selectedPlant.growthProgress < 30 ? '#60a5fa' : 
+                                        selectedPlant.growthProgress < 70 ? '#10b981' : 
+                                        '#84cc16'
+                      }}
+                    ></div>
+                  </div>
+                  <div className="mt-1 flex justify-between">
+                    <span className="text-white text-opacity-70 text-xs">Stade: {selectedPlant.growthStage}</span>
+                    <span className="text-white text-opacity-70 text-xs">
+                      {selectedPlant.growthProgress < 30 ? 'Jeune' : 
+                       selectedPlant.growthProgress < 70 ? 'En croissance' : 
+                       'Mature'}
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : (
