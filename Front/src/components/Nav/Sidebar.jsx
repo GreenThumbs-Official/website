@@ -12,10 +12,10 @@ export default function Sidebar ({ className, children, userType = 'user', ...pr
   ];
 
   const userMenuItems = [
-    { label: 'Ma Collection', href: '/dashboard', icon: '🌿' },
-    { label: 'Calendrier d\'arrosage', href: '/watering', icon: '💧' },
-    { label: 'Guide de soins', href: '/care-guide', icon: '📖' },
-    { label: 'Mon Profil', href: '/profile', icon: '👤' },
+    { label: 'Ma Collection', href: '/dash/user', icon: '🌿' },
+    { label: 'Calendrier d\'arrosage', href: '/dash/user/watering', icon: '💧' },
+    { label: 'Guide de soins', href: '/dash/user/guide', icon: '📖' },
+    { label: 'Mon Profil', href: '/profile/@me', icon: '👤' },
   ];
 
   const menuItems = userType === 'admin' ? adminMenuItems : userMenuItems;
