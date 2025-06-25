@@ -10,7 +10,7 @@ export default function Sidebar ({ className, children, userType = 'user', ...pr
     { label: 'Dashboard', href: '/dash/Admin', icon: '📊' },
     { label: 'Utilisateurs', href: '/dash/admin/users', icon: '👥' },
     { label: 'Plantes', href: '/dash/admin/plants', icon: '🌱' },
-    { label: 'Conseils', href: '/dash/admin/advices', icon: '👥' },
+    { label: 'Conseils', href: '/dash/admin/advices', icon: '💡' },
   ];
 
   const userMenuItems = [
