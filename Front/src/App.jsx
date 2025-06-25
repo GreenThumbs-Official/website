@@ -4,7 +4,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 
 
 export default function App() {
-  const routes = useRouter();
+  const routes = useRouter() || [];
 
   // Fonction pour déterminer si une route doit être protégée et avec quel rôle
   const renderRouteElement = (path, Component) => {

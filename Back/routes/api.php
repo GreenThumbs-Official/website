@@ -60,11 +60,11 @@ Route::post('/handle-prompt', [GeminiController::class, 'handlePrompt']);
  * Default route used to get all advices
  */
 
-Route::get('/Advices', [AdvicesController::class, 'index']);
+Route::get('/advices', [AdvicesController::class, 'index']);
 
 Route::middleware(['auth:sanctum', 'can:isAdmin'])->group(function () {
 
-Route::post('/Advices', [AdvicesController::class, 'store']);
+Route::post('/advices', [AdvicesController::class, 'store']);
 Route::put('/plants/{plant}', [AdvicesController::class, 'update']);
 Route::delete('/plants/{plant}', [PlantController::class, 'destroy']);
 
