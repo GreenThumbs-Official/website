@@ -40,7 +40,7 @@ export default function Home() {
                         </div>
                         <div className="flex-1 p-4 overflow-y-auto">
                         </div>
-                <form className="p-4 border-t flex gap-2">
+                <form className="p-4 border-t flex gap-2"> 
                     <input
                         type="text"
                         placeholder="Votre message..."
