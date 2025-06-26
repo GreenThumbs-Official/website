@@ -5,6 +5,7 @@ export default function ChatBot() {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [history, setHistory] = useState([]);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -19,39 +20,36 @@ export default function ChatBot() {
         e.preventDefault();
         if (!input.trim()) return;
 
+        // Optimistically add user message
         const userMessage = { text: input, sender: 'user' };
         setMessages(prev => [...prev, userMessage]);
-        setInput('');
-        setIsLoading(true);
 
+        setIsLoading(true);
         try {
-            const response = await fetch('http://127.0.0.1/api/handle-prompt', {
+            const response = await fetch('http://127.0.0.1:8000/api/handle-chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     prompt: input,
-                    instructions: 'Tu es un assistant de jardinage qui aide les utilisateurs à prendre soin de leurs plantes. Réponds de manière concise et utile.',
-                    response_syntax: 'text'
+                    history: JSON.stringify(history)
                 }),
             });
-
             const data = await response.json();
-            
-            const botMessage = { 
-                text: data.response || data.clean_response || 'Désolé, je n\'ai pas pu traiter votre demande.', 
-                sender: 'bot' 
-            };
-            setMessages(prev => [...prev, botMessage]);
+            // Update history from backend response
+            setHistory(data.history || []);
+            // Map backend history to messages for display
+            const mappedMessages = (data.history || []).map(msg => ({
+                text: msg.parts[0]?.text || '',
+                sender: msg.role === 'user' ? 'user' : 'model'
+            }));
+            setMessages(mappedMessages);
         } catch (error) {
             console.error('Erreur lors de l\'envoi du message:', error);
-            const errorMessage = { 
-                text: 'Désolé, une erreur s\'est produite. Veuillez réessayer.', 
-                sender: 'bot' 
-            };
-            setMessages(prev => [...prev, errorMessage]);
+            setMessages(prev => [...prev, { text: 'Désolé, une erreur s\'est produite. Veuillez réessayer.', sender: 'model' }]);
         } finally {
+            setInput('');
             setIsLoading(false);
         }
     };
@@ -81,7 +79,7 @@ export default function ChatBot() {
                         {messages.map((message, index) => (
                             <div 
                                 key={index} 
-                                className={`mb-3 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}
+                                className={`mb-3 flex ${message.sender === 'user' ? 'justify-end ' : 'justify-start'}`}
                             >
                                 <div 
                                     className={`inline-block px-3 py-2 rounded-lg ${message.sender === 'user' 
