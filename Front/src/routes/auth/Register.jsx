@@ -195,10 +195,10 @@ export default function Register() {
                   <Button type="button" onClick={prevStep} className="bg-gray-500 hover:bg-gray-600">Précédent</Button>
                 )}
                 {step < 2 && (
-                  <Button type="button" onClick={nextStep} className="ml-auto">Suivant</Button>
+                  <Button type="button" onClick={nextStep} className="ml-auto bg-primary hover:bg-primary-dark transition-colors duration-200">Suivant</Button>
                 )}
                 {step === 2 && (
-                  <Button type="submit" className="ml-auto">S'inscrire</Button>
+                  <Button type="submit" className="ml-auto bg-primary hover:bg-primary-dark transition-colors duration-200">S'inscrire</Button>
                 )}
               </div>
             </form>
