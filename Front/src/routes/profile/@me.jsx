@@ -178,14 +178,20 @@ export default function ProfileMe() {
       const formattedPlants = plantsArray.map(plant => ({
         id: plant.id,
         name: plant.name,
+        type: plant.type || '',
         description: plant.description || '',
         origin: plant.origin || '',
         image: plant.image || null,
+        length: plant.length || null,
+        fruitProductionMonth: plant.fruit_production_month || null,
+        maxTemp: plant.max_temp || null,
+        minTemp: plant.min_temp || null,
         wateringFrequency: plant.watering_frequency || 7,
         lastWatered: plant.last_watered || null,
-        nextWatering: plant.next_watering || null,
-        growthProgress: calculateGrowthProgress(plant.last_watered, plant.watering_frequency),
-        growthStage: getGrowthStage(calculateGrowthProgress(plant.last_watered, plant.watering_frequency))
+        plantedDate: plant.planted_date || null,
+        nextWatering: plant.next_watering || calculateNextWatering(plant.last_watered, plant.watering_frequency),
+        growthProgress: calculateGrowthProgress(plant.planted_date, plant.last_watered),
+        growthStage: getGrowthStage(calculateGrowthProgress(plant.planted_date, plant.last_watered))
       }));
       
       setPlants(formattedPlants);
@@ -210,20 +216,38 @@ export default function ProfileMe() {
     }
   };
   
-  const calculateGrowthProgress = (lastWatered, frequency) => {
-    if (!lastWatered || !frequency) return 0;
+  const calculateGrowthProgress = (plantedDate, lastWatered) => {
+    if (!plantedDate) {
+      // Si pas de date de plantation, utiliser l'arrosage comme indicateur
+      if (!lastWatered) return 0;
+      const lastWateredDate = parseISO(lastWatered);
+      const today = new Date();
+      const daysSinceLastWatered = Math.floor((today - lastWateredDate) / (1000 * 60 * 60 * 24));
+      return Math.min(daysSinceLastWatered * 2, 100); // Croissance basée sur l'arrosage
+    }
     
-    const lastWateredDate = parseISO(lastWatered);
+    const plantedDateObj = parseISO(plantedDate);
     const today = new Date();
-    const daysSinceLastWatered = Math.floor((today - lastWateredDate) / (1000 * 60 * 60 * 24));
+    const daysSincePlanted = Math.floor((today - plantedDateObj) / (1000 * 60 * 60 * 24));
     
-    return Math.min(Math.floor(daysSinceLastWatered / frequency * 100), 100);
+    // Calcul basé sur une croissance progressive sur 365 jours (1 an)
+    return Math.min(Math.floor((daysSincePlanted / 365) * 100), 100);
   };
 
   const getGrowthStage = (progress) => {
     if (progress < 30) return 'Jeune';
     if (progress < 70) return 'En croissance';
     return 'Mature';
+  };
+  
+  const calculateNextWatering = (lastWatered, frequency) => {
+    if (!lastWatered || !frequency) return null;
+    
+    const lastWateredDate = parseISO(lastWatered);
+    const nextWateringDate = new Date(lastWateredDate);
+    nextWateringDate.setDate(nextWateringDate.getDate() + frequency);
+    
+    return nextWateringDate.toISOString();
   };
   
   const handleAddPlant = async () => {
@@ -281,6 +305,30 @@ export default function ProfileMe() {
       month: 'long',
       day: 'numeric'
     });
+  };
+  
+  const formatFruitProductionMonth = (monthString) => {
+    if (!monthString) return 'Non spécifié';
+    
+    const months = {
+      '1': 'Janvier', '2': 'Février', '3': 'Mars', '4': 'Avril',
+      '5': 'Mai', '6': 'Juin', '7': 'Juillet', '8': 'Août',
+      '9': 'Septembre', '10': 'Octobre', '11': 'Novembre', '12': 'Décembre'
+    };
+    
+    // Si c'est une plage de mois (ex: "5-8" pour Mai à Août)
+    if (monthString.includes('-')) {
+      const [start, end] = monthString.split('-');
+      return `${months[start]} à ${months[end]}`;
+    }
+    
+    // Si c'est plusieurs mois séparés par des virgules
+    if (monthString.includes(',')) {
+      return monthString.split(',').map(m => months[m.trim()]).join(', ');
+    }
+    
+    // Si c'est un seul mois
+    return months[monthString] || monthString;
   };
 
   useEffect(() => {
@@ -542,11 +590,18 @@ export default function ProfileMe() {
               <div>
                 <CardTitle className="text-primary flex items-center gap-2">
                   <span>🌱</span>
-                  Mes plantes
+                  Mes plantes ({plants.length})
                 </CardTitle>
                 <CardDescription>
                   Gérez votre collection de plantes
                 </CardDescription>
+                {plants.length > 0 && (
+                  <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
+                    <span>🚨 {plants.filter(p => p.nextWatering && new Date(p.nextWatering) <= new Date()).length} à arroser</span>
+                    <span>⚠️ {plants.filter(p => p.nextWatering && new Date(p.nextWatering) <= new Date(Date.now() + 24 * 60 * 60 * 1000) && new Date(p.nextWatering) > new Date()).length} bientôt</span>
+                    <span>🌿 {plants.filter(p => p.growthStage === 'Mature').length} matures</span>
+                  </div>
+                )}
               </div>
               <Button 
                 onClick={() => setIsAddPlantDialogOpen(true)}
@@ -605,16 +660,54 @@ export default function ProfileMe() {
                           </div>
                         )}
                         {plant.lastWatered && (
-                          <div className="absolute bottom-2 right-2 bg-primary text-white text-xs px-2 py-1 rounded-full">
-                            {plant.nextWatering ? `Arrosage: ${formatPlantDate(plant.nextWatering)}` : `Dernier arrosage: ${formatPlantDate(plant.lastWatered)}`}
+                          <div className={`absolute bottom-2 right-2 text-white text-xs px-2 py-1 rounded-full ${
+                            plant.nextWatering && new Date(plant.nextWatering) <= new Date() 
+                              ? 'bg-red-500' 
+                              : plant.nextWatering && new Date(plant.nextWatering) <= new Date(Date.now() + 24 * 60 * 60 * 1000)
+                              ? 'bg-orange-500'
+                              : 'bg-primary'
+                          }`}>
+                            {plant.nextWatering ? (
+                              new Date(plant.nextWatering) <= new Date() 
+                                ? '🚨 À arroser maintenant'
+                                : new Date(plant.nextWatering) <= new Date(Date.now() + 24 * 60 * 60 * 1000)
+                                ? '⚠️ Arroser bientôt'
+                                : `Arrosage: ${formatPlantDate(plant.nextWatering)}`
+                            ) : `Dernier: ${formatPlantDate(plant.lastWatered)}`}
                           </div>
                         )}
                       </div>
                       <CardContent className="p-4">
                         <h3 className="font-semibold text-lg mb-1">{plant.name}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
+                        {plant.type && (
+                          <p className="text-xs text-primary font-medium mb-1">{plant.type}</p>
+                        )}
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                           {plant.description || 'Aucune description'}
                         </p>
+                        
+                        {/* Informations environnementales */}
+                        {(plant.minTemp || plant.maxTemp) && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs text-muted-foreground">🌡️</span>
+                            <span className="text-xs">
+                              {plant.minTemp && plant.maxTemp 
+                                ? `${plant.minTemp}°C - ${plant.maxTemp}°C`
+                                : plant.minTemp 
+                                ? `Min: ${plant.minTemp}°C`
+                                : `Max: ${plant.maxTemp}°C`
+                              }
+                            </span>
+                          </div>
+                        )}
+                        
+                        {plant.length && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs text-muted-foreground">📏</span>
+                            <span className="text-xs">Taille: {plant.length}cm</span>
+                          </div>
+                        )}
+                        
                         <div className="mt-2">
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-xs font-medium">Croissance</span>
@@ -671,6 +764,12 @@ export default function ProfileMe() {
                       )}
                     </div>
                     <div className="space-y-4">
+                      {selectedPlant.type && (
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-400">Type</h3>
+                          <p className="mt-1">{selectedPlant.type}</p>
+                        </div>
+                      )}
                       <div>
                         <h3 className="text-sm font-medium text-gray-400">Description</h3>
                         <p className="mt-1">{selectedPlant.description || 'Aucune description disponible'}</p>
@@ -679,18 +778,76 @@ export default function ProfileMe() {
                         <h3 className="text-sm font-medium text-gray-400">Origine</h3>
                         <p className="mt-1">{selectedPlant.origin || 'Origine inconnue'}</p>
                       </div>
+                      
+                      {/* Informations botaniques */}
+                      {selectedPlant.length && (
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-400">Taille</h3>
+                          <p className="mt-1">{selectedPlant.length} cm</p>
+                        </div>
+                      )}
+                      
+                      {(selectedPlant.minTemp || selectedPlant.maxTemp) && (
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-400">Température optimale</h3>
+                          <p className="mt-1">
+                            {selectedPlant.minTemp && selectedPlant.maxTemp 
+                              ? `${selectedPlant.minTemp}°C - ${selectedPlant.maxTemp}°C`
+                              : selectedPlant.minTemp 
+                              ? `Minimum: ${selectedPlant.minTemp}°C`
+                              : `Maximum: ${selectedPlant.maxTemp}°C`
+                            }
+                          </p>
+                        </div>
+                      )}
+                      
+                      {selectedPlant.fruitProductionMonth && (
+                         <div>
+                           <h3 className="text-sm font-medium text-gray-400">Mois de production de fruits</h3>
+                           <p className="mt-1">{formatFruitProductionMonth(selectedPlant.fruitProductionMonth)}</p>
+                         </div>
+                       )}
+                      
                       <div>
                         <h3 className="text-sm font-medium text-gray-400">Fréquence d'arrosage</h3>
                         <p className="mt-1">Tous les {selectedPlant.wateringFrequency} jours</p>
                       </div>
+                      
+                      {selectedPlant.plantedDate && (
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-400">Date de plantation</h3>
+                          <p className="mt-1">{formatPlantDate(selectedPlant.plantedDate)}</p>
+                        </div>
+                      )}
+                      
                       <div>
                         <h3 className="text-sm font-medium text-gray-400">Dernier arrosage</h3>
                         <p className="mt-1">{selectedPlant.lastWatered ? formatPlantDate(selectedPlant.lastWatered) : 'Jamais'}</p>
                       </div>
                       <div>
-                        <h3 className="text-sm font-medium text-gray-400">Prochain arrosage</h3>
-                        <p className="mt-1">{selectedPlant.nextWatering ? formatPlantDate(selectedPlant.nextWatering) : 'Non planifié'}</p>
-                      </div>
+                         <h3 className="text-sm font-medium text-gray-400">Prochain arrosage</h3>
+                         <p className="mt-1">{selectedPlant.nextWatering ? formatPlantDate(selectedPlant.nextWatering) : 'Non planifié'}</p>
+                         {selectedPlant.nextWatering && (
+                           <div className="mt-2">
+                             {new Date(selectedPlant.nextWatering) <= new Date() ? (
+                               <div className="flex items-center gap-2 text-red-400">
+                                 <span>🚨</span>
+                                 <span className="text-sm font-medium">Cette plante a besoin d'eau maintenant !</span>
+                               </div>
+                             ) : new Date(selectedPlant.nextWatering) <= new Date(Date.now() + 24 * 60 * 60 * 1000) ? (
+                               <div className="flex items-center gap-2 text-orange-400">
+                                 <span>⚠️</span>
+                                 <span className="text-sm font-medium">Arrosage recommandé dans les 24h</span>
+                               </div>
+                             ) : (
+                               <div className="flex items-center gap-2 text-green-400">
+                                 <span>✅</span>
+                                 <span className="text-sm font-medium">Pas d'arrosage nécessaire pour le moment</span>
+                               </div>
+                             )}
+                           </div>
+                         )}
+                       </div>
                       <div>
                         <h3 className="text-sm font-medium text-gray-400">Stade de croissance</h3>
                         <div className="mt-2">
