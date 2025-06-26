@@ -78,7 +78,7 @@ class User extends Authenticatable
     public function favoritePlants()
     {
         return $this->belongsToMany(Plant::class, 'user_plants')
-                    ->withPivot('last_watered', 'watering_frequency', 'custom_name', 'description', 'origin', 'image', 'planted_date')
+                    ->withPivot('last_watered', 'watering_frequency', 'custom_name', 'description', 'origin', 'image', 'growth_progress')
                     ->withTimestamps();
     }
 }

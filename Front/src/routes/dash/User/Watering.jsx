@@ -17,9 +17,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import Sidebar from '@/components/Nav/Sidebar';
-import { format, addDays, isSameDay, parseISO } from 'date-fns';
+import { format, addDays, isSameDay, parseISO, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Droplets, TrendingUp, Calendar as CalendarIcon, Clock } from 'lucide-react';
 
 export default function WateringCalendar() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -29,6 +40,13 @@ export default function WateringCalendar() {
   const [isPlantDialogOpen, setIsPlantDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [wateringStats, setWateringStats] = useState({
+    totalWaterings: 0,
+    weeklyWaterings: 0,
+    averageGrowth: 0,
+    plantsNeedingWater: 0
+  });
+  const [viewMode, setViewMode] = useState('calendar'); // 'calendar' ou 'table'
 
   useEffect(() => {
     const fetchUserPlants = async () => {
@@ -58,15 +76,33 @@ export default function WateringCalendar() {
         const data = await response.json();
         
         if (data && Array.isArray(data)) {
-          const formattedPlants = data.map(plant => ({
-            id: plant.id,
-            name: plant.name,
-            wateringFrequency: plant.watering_frequency || 7,
-            lastWatered: plant.last_watered || new Date().toISOString().split('T')[0],
-            image: plant.image || '/api/placeholder/150/150',
-            growthProgress: plant.growth_progress || Math.floor(Math.random() * 100),
-            growthStage: plant.growth_stage || (plant.growth_progress < 30 ? 'Jeune' : plant.growth_progress < 70 ? 'En croissance' : 'Mature')
-          }));
+          const formattedPlants = data.map(plant => {
+            const lastWateredDate = plant.last_watered ? parseISO(plant.last_watered) : new Date();
+            const daysSinceWatering = differenceInDays(new Date(), lastWateredDate);
+            const wateringFreq = plant.watering_frequency || 7;
+            
+            // Calculer la progression basée sur l'arrosage régulier
+            let growthProgress = plant.growth_progress || 0;
+            if (daysSinceWatering <= wateringFreq) {
+              growthProgress = Math.min(growthProgress + (5 * (wateringFreq - daysSinceWatering)), 100);
+            } else {
+              growthProgress = Math.max(growthProgress - (2 * (daysSinceWatering - wateringFreq)), 0);
+            }
+            
+            return {
+              id: plant.id,
+              name: plant.name,
+              type: plant.type || 'Plante',
+              wateringFrequency: wateringFreq,
+              lastWatered: plant.last_watered || new Date().toISOString().split('T')[0],
+              image: plant.image || '/api/placeholder/150/150',
+              growthProgress: Math.round(growthProgress),
+              growthStage: growthProgress < 30 ? 'Jeune' : growthProgress < 70 ? 'En croissance' : 'Mature',
+              needsWater: daysSinceWatering >= wateringFreq,
+              daysUntilNextWatering: Math.max(0, wateringFreq - daysSinceWatering),
+              health: daysSinceWatering <= wateringFreq / 2 ? 'Excellente' : daysSinceWatering <= wateringFreq ? 'Bonne' : daysSinceWatering <= wateringFreq + 2 ? 'Moyenne' : 'Faible'
+            };
+          });
           
           setPlants(formattedPlants);
           generateWateringSchedule(formattedPlants);
@@ -81,6 +117,59 @@ export default function WateringCalendar() {
     
     fetchUserPlants();
   }, []);
+  
+  // Charger les statistiques après que les plantes soient chargées
+  useEffect(() => {
+    if (plants.length > 0) {
+      calculateStats();
+    }
+  }, [plants]);
+
+  const calculateStats = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return;
+      }
+      
+      const response = await fetch('http://127.0.0.1:8000/api/watering-stats', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 422) {
+          // Erreur de validation (date future ou plante déjà arrosée)
+          console.error('Erreur de validation:', errorData.message);
+          setError(errorData.message || 'Impossible d\'arroser cette plante');
+          return;
+        }
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const stats = await response.json();
+      
+      // Calculer la croissance moyenne depuis les plantes locales
+      const averageGrowth = plants.length > 0 
+        ? Math.round(plants.reduce((sum, plant) => sum + plant.growthProgress, 0) / plants.length)
+        : 0;
+      
+      setWateringStats({
+        totalWaterings: stats.weekly_waterings,
+        weeklyWaterings: stats.weekly_waterings,
+        averageGrowth: averageGrowth,
+        plantsNeedingWater: stats.plants_needing_water
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des statistiques:', error);
+    }
+  };
 
   const generateWateringSchedule = (plantsData) => {
     const schedule = [];
@@ -131,6 +220,95 @@ export default function WateringCalendar() {
     );
   };
 
+  const waterPlantDirect = async (plantId) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return;
+      }
+      
+      const today = new Date().toISOString().split('T')[0];
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/user-plants/${plantId}/water`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          last_watered: today,
+          notes: `Arrosage effectué via le tableau`
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 422) {
+          // Erreur de validation (plante déjà arrosée aujourd'hui)
+          setError(errorData.message || 'Cette plante a déjà été arrosée aujourd\'hui');
+          return;
+        }
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const responseData = await response.json();
+      const newProgress = responseData.growth_progress;
+      
+      // Mettre à jour l'état des plantes
+      setPlants(prev => {
+        const updatedPlants = prev.map(plant => {
+          if (plant.id === plantId) {
+            let growthStage = plant.growthStage;
+            if (newProgress < 30) growthStage = 'Jeune';
+            else if (newProgress < 70) growthStage = 'En croissance';
+            else growthStage = 'Mature';
+            
+            return {
+              ...plant,
+              lastWatered: today,
+              growthProgress: newProgress,
+              growthStage: growthStage,
+              needsWater: false,
+              daysUntilNextWatering: plant.wateringFrequency,
+              health: 'Excellente'
+            };
+          }
+          return plant;
+        });
+        
+        // Recalculer les statistiques et le calendrier après l'arrosage
+        setTimeout(() => {
+          calculateStats();
+        }, 100);
+        
+        // Mettre à jour le calendrier avec les nouvelles données
+        generateWateringSchedule(updatedPlants);
+        
+        return updatedPlants;
+      });
+      
+      // Mettre à jour la plante sélectionnée si c'est celle qui a été arrosée
+      if (selectedPlant && selectedPlant.id === plantId) {
+        setSelectedPlant(prev => ({
+          ...prev,
+          lastWatered: today,
+          growthProgress: newProgress,
+          growthStage: newProgress < 30 ? 'Jeune' : 
+                      newProgress < 70 ? 'En croissance' : 
+                      'Mature',
+          needsWater: false,
+          daysUntilNextWatering: prev.wateringFrequency,
+          health: 'Excellente'
+        }));
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'arrosage:', error);
+      setError('Erreur lors de l\'arrosage');
+    }
+  };
+
   const markAsWatered = async (eventId) => {
     try {
       const event = wateringSchedule.find(e => e.id === eventId);
@@ -152,13 +330,23 @@ export default function WateringCalendar() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          last_watered: today
+          last_watered: today,
+          notes: `Arrosage effectué via le calendrier`
         })
       });
       
       if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 422) {
+          // Erreur de validation (plante déjà arrosée aujourd'hui)
+          setError(errorData.message || 'Cette plante a déjà été arrosée aujourd\'hui');
+          return;
+        }
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
+      
+      const responseData = await response.json();
+      const newProgress = responseData.growth_progress;
       
       // Mettre à jour l'état local
       setWateringSchedule(prev => 
@@ -170,11 +358,9 @@ export default function WateringCalendar() {
       );
       
       if (selectedPlant && selectedPlant.id === event.plantId) {
-        setPlants(prev => 
-          prev.map(plant => {
+        setPlants(prev => {
+          const updatedPlants = prev.map(plant => {
             if (plant.id === selectedPlant.id) {
-              const newProgress = Math.min(plant.growthProgress + 5, 100);
-              
               let growthStage = plant.growthStage;
               if (newProgress < 30) growthStage = 'Jeune';
               else if (newProgress < 70) growthStage = 'En croissance';
@@ -184,20 +370,36 @@ export default function WateringCalendar() {
                 ...plant,
                 lastWatered: today,
                 growthProgress: newProgress,
-                growthStage: growthStage
+                growthStage: growthStage,
+                needsWater: false,
+                daysUntilNextWatering: plant.wateringFrequency,
+                health: 'Excellente'
               };
             }
             return plant;
-          })
-        );
+          });
+        
+        // Recalculer les statistiques et le calendrier après l'arrosage
+        setTimeout(() => {
+          calculateStats();
+        }, 100);
+        
+        // Mettre à jour le calendrier avec les nouvelles données
+        generateWateringSchedule(updatedPlants);
+        
+        return updatedPlants;
+        });
         
         setSelectedPlant(prev => ({
           ...prev,
           lastWatered: today,
-          growthProgress: Math.min(prev.growthProgress + 5, 100),
-          growthStage: prev.growthProgress + 5 < 30 ? 'Jeune' : 
-                      prev.growthProgress + 5 < 70 ? 'En croissance' : 
-                      'Mature'
+          growthProgress: newProgress,
+          growthStage: newProgress < 30 ? 'Jeune' : 
+                      newProgress < 70 ? 'En croissance' : 
+                      'Mature',
+          needsWater: false,
+          daysUntilNextWatering: prev.wateringFrequency,
+          health: 'Excellente'
         }));
       }
     } catch (error) {
@@ -326,7 +528,76 @@ export default function WateringCalendar() {
           </p>
         </div>
 
+        {/* Statistiques d'arrosage */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <Droplets className="h-8 w-8 text-blue-400" />
+                <div>
+                  <p className="text-2xl font-bold text-white">{wateringStats.weeklyWaterings}</p>
+                  <p className="text-xs text-white text-opacity-70">Arrosages cette semaine</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="h-8 w-8 text-green-400" />
+                <div>
+                  <p className="text-2xl font-bold text-white">{wateringStats.averageGrowth}%</p>
+                  <p className="text-xs text-white text-opacity-70">Croissance moyenne</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <Clock className="h-8 w-8 text-yellow-400" />
+                <div>
+                  <p className="text-2xl font-bold text-white">{wateringStats.plantsNeedingWater}</p>
+                  <p className="text-xs text-white text-opacity-70">Plantes à arroser</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <CalendarIcon className="h-8 w-8 text-purple-400" />
+                <div>
+                  <p className="text-2xl font-bold text-white">{plants.length}</p>
+                  <p className="text-xs text-white text-opacity-70">Total plantes</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
+        {/* Sélecteur de vue */}
+        <div className="flex justify-center space-x-2">
+          <Button
+            variant={viewMode === 'calendar' ? 'default' : 'outline'}
+            onClick={() => setViewMode('calendar')}
+            className={viewMode === 'calendar' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-white bg-opacity-20 text-white border-white border-opacity-30 hover:bg-opacity-30'}
+          >
+            <CalendarIcon className="w-4 h-4 mr-2" />
+            Vue Calendrier
+          </Button>
+          <Button
+            variant={viewMode === 'table' ? 'default' : 'outline'}
+            onClick={() => setViewMode('table')}
+            className={viewMode === 'table' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-white bg-opacity-20 text-white border-white border-opacity-30 hover:bg-opacity-30'}
+          >
+            <Table className="w-4 h-4 mr-2" />
+            Vue Tableau
+          </Button>
+        </div>
 
         <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
           <CardHeader>
@@ -346,8 +617,8 @@ export default function WateringCalendar() {
                     <DialogTitle>Sélectionner une plante</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
-                    <p className="text-gray-300">
-                      Choisissez une plante pour voir son calendrier d'arrosage :
+                     <p className="text-gray-300">
+                       Choisissez une plante pour voir son calendrier d'arrosage :
                     </p>
                     <Select onValueChange={managePlantSelect}>
                       <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
@@ -399,29 +670,42 @@ export default function WateringCalendar() {
                   </div>
                 </div>
                 
-                <div className="mt-4">
+                <div className="mt-4 space-y-3">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-white text-sm font-medium">Progression de croissance</span>
                     <span className="text-white text-sm font-medium">{selectedPlant.growthProgress}%</span>
                   </div>
-                  <div className="w-full bg-white bg-opacity-20 rounded-full h-2.5">
-                    <div 
-                      className="h-2.5 rounded-full" 
-                      style={{
-                        width: `${selectedPlant.growthProgress}%`,
-                        backgroundColor: selectedPlant.growthProgress < 30 ? '#60a5fa' : 
-                                        selectedPlant.growthProgress < 70 ? '#10b981' : 
-                                        '#84cc16'
-                      }}
-                    ></div>
-                  </div>
-                  <div className="mt-1 flex justify-between">
-                    <span className="text-white text-opacity-70 text-xs">Stade: {selectedPlant.growthStage}</span>
-                    <span className="text-white text-opacity-70 text-xs">
-                      {selectedPlant.growthProgress < 30 ? 'Jeune' : 
-                       selectedPlant.growthProgress < 70 ? 'En croissance' : 
-                       'Mature'}
-                    </span>
+                  <Progress 
+                    value={selectedPlant.growthProgress} 
+                    className="w-full h-3 bg-white bg-opacity-20"
+                  />
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="text-center">
+                      <p className="text-white text-opacity-70">Stade</p>
+                      <Badge variant="outline" className="text-white border-white border-opacity-30">
+                        {selectedPlant.growthStage}
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-white text-opacity-70">Santé</p>
+                      <Badge 
+                        variant="outline" 
+                        className={`border-opacity-30 ${
+                          selectedPlant.health === 'Excellente' ? 'text-emerald-400 border-emerald-400' :
+                selectedPlant.health === 'Bonne' ? 'text-green-400 border-green-400' :
+                selectedPlant.health === 'Moyenne' ? 'text-yellow-400 border-yellow-400' :
+                          'text-red-400 border-red-400'
+                        }`}
+                      >
+                        {selectedPlant.health}
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-white text-opacity-70">Prochain arrosage</p>
+                      <Badge variant="outline" className="text-white border-white border-opacity-30">
+                        {selectedPlant.daysUntilNextWatering === 0 ? 'Aujourd\'hui' : `${selectedPlant.daysUntilNextWatering}j`}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -430,44 +714,133 @@ export default function WateringCalendar() {
                 Aucune plante sélectionnée. Cliquez sur "Choisir une plante" pour commencer.
               </p>
             )}
-          </CardContent>
+           </CardContent>
         </Card>
 
         {selectedPlant && (
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
-              <CardHeader>
-                <CardTitle className="text-white">Calendrier</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  locale={fr}
-                  className="text-black [&_.rdp-day_button]:bg-white [&_.rdp-day_button]:bg-opacity-20 [&_.rdp-day_button]:border [&_.rdp-day_button]:border-white [&_.rdp-day_button]:border-opacity-30 [&_.rdp-day_button]:rounded-md [&_.rdp-button_previous]:bg-white [&_.rdp-button_previous]:bg-opacity-20 [&_.rdp-button_next]:bg-white [&_.rdp-button_next]:bg-opacity-20 [&_.rdp-weekday]:text-black [&_.rdp-caption]:text-black"
-                  modifiers={{
-                    watering: (date) => hasWateringEvent(date)
-                  }}
-                  modifiersStyles={{
-                    watering: {
-                      backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                      color: 'white',
-                      fontWeight: 'bold'
-                    }
-                  }}
-                />
-                <div className="mt-4 text-sm text-white text-opacity-70">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-blue-500 bg-opacity-50 rounded"></div>
-                    <span>Jours d'arrosage</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="space-y-4">
+          <div className={viewMode === 'calendar' ? 'grid md:grid-cols-2 gap-6' : 'space-y-6'}>
+            {viewMode === 'calendar' ? (
               <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
+                <CardHeader>
+                  <CardTitle className="text-white">Calendrier</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    locale={fr}
+                    className="text-black [&_.rdp-day_button]:bg-white [&_.rdp-day_button]:bg-opacity-20 [&_.rdp-day_button]:border [&_.rdp-day_button]:border-white [&_.rdp-day_button]:border-opacity-30 [&_.rdp-day_button]:rounded-md [&_.rdp-button_previous]:bg-white [&_.rdp-button_previous]:bg-opacity-20 [&_.rdp-button_next]:bg-white [&_.rdp-button_next]:bg-opacity-20 [&_.rdp-weekday]:text-black [&_.rdp-caption]:text-black"
+                    modifiers={{
+                      watering: (date) => hasWateringEvent(date)
+                    }}
+                    modifiersStyles={{
+                      watering: {
+                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                        color: 'white',
+                        fontWeight: 'bold'
+                      }
+                    }}
+                  />
+                  <div className="mt-4 text-sm text-white text-opacity-70">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-blue-500 bg-opacity-50 rounded"></div>
+                      <span>Jours d'arrosage</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
+                <CardHeader>
+                  <CardTitle className="text-white">Tableau de suivi des plantes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-white border-opacity-20">
+                        <TableHead className="text-white">Plante</TableHead>
+                        <TableHead className="text-white">Progression</TableHead>
+                        <TableHead className="text-white">Santé</TableHead>
+                        <TableHead className="text-white">Dernier arrosage</TableHead>
+                        <TableHead className="text-white">Prochain arrosage</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {plants.map((plant) => (
+                        <TableRow key={plant.id} className="border-white border-opacity-10">
+                          <TableCell className="text-white">
+                            <div className="flex items-center space-x-3">
+                              <img 
+                                src={plant.image} 
+                                alt={plant.name}
+                                className="w-10 h-10 rounded-lg object-cover"
+                              />
+                              <div>
+                                <p className="font-medium">{plant.name}</p>
+                                <p className="text-sm text-white text-opacity-70">{plant.type}</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-white">
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-sm">
+                                <span>{plant.growthProgress}%</span>
+                                <span className="text-white text-opacity-70">{plant.growthStage}</span>
+                              </div>
+                              <Progress value={plant.growthProgress} className="w-full h-2" />
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant="outline" 
+                              className={`border-opacity-30 ${
+                                plant.health === 'Excellente' ? 'text-emerald-400 border-emerald-400' :
+                plant.health === 'Bonne' ? 'text-green-400 border-green-400' :
+                plant.health === 'Moyenne' ? 'text-yellow-400 border-yellow-400' :
+                                'text-red-400 border-red-400'
+                              }`}
+                            >
+                              {plant.health}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-white text-opacity-70">
+                            {format(parseISO(plant.lastWatered), 'dd/MM/yyyy', { locale: fr })}
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant="outline" 
+                              className={`border-opacity-30 ${
+                                plant.needsWater ? 'text-red-400 border-red-400' : 'text-green-400 border-green-400'
+                              }`}
+                            >
+                              {plant.needsWater ? 'Maintenant' : `${plant.daysUntilNextWatering}j`}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                waterPlantDirect(plant.id);
+                              }}
+                              disabled={!plant.needsWater}
+                              className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <Droplets className="w-4 h-4 mr-1" />
+                              {plant.needsWater ? 'Arroser' : 'Arrosé'}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+
+            {viewMode === 'calendar' && (
+              <div className="space-y-4">
+                <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
                 <CardHeader>
                   <CardTitle className="text-white">
                     {format(selectedDate, 'dd MMMM yyyy', { locale: fr })}
@@ -479,15 +852,21 @@ export default function WateringCalendar() {
                       {getWateringEventsForDate(selectedDate).map((event) => (
                         <div key={event.id} className="flex items-center justify-between p-3 bg-white bg-opacity-10 rounded-lg">
                           <span className="text-white">{event.plantName}</span>
-                          {!event.watered && (
-                            <Button
-                              size="sm"
-                              onClick={() => markAsWatered(event.id)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white"
-                            >
-                              Marquer comme arrosé
-                            </Button>
-                          )}
+                          {(() => {
+                            const plant = plants.find(p => p.id === event.plantId);
+                            const canWater = plant && plant.needsWater;
+                            
+                            return (
+                              <Button
+                                size="sm"
+                                onClick={() => canWater ? markAsWatered(event.id) : null}
+                                disabled={!canWater}
+                                className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {canWater ? 'Marquer comme arrosé' : 'Déjà arrosé'}
+                              </Button>
+                            );
+                          })()}
                           {event.watered && (
                             <span className="text-green-400 text-sm">✅ Arrosé</span>
                           )}
@@ -554,7 +933,8 @@ export default function WateringCalendar() {
                   )}
                 </CardContent>
               </Card>
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -34,6 +34,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user-plants', [UserPlantController::class, 'store']);
     Route::delete('/user-plants/{plant}', [UserPlantController::class, 'destroy']);
     Route::put('/user-plants/{plant}/water', [UserPlantController::class, 'water']);
+    
+    // Routes pour l'historique des arrosages
+    Route::get('/user-plants/{plant}/watering-history', [UserPlantController::class, 'getWateringHistory']);
+    Route::get('/watering-stats', [UserPlantController::class, 'getWateringStats']);
 });
 
 /**

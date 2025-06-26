@@ -148,7 +148,7 @@ export default function ProfileMe() {
       const token = localStorage.getItem('access_token');
       if (!token) return;
       
-      const response = await fetch('/api/user-plants', {
+      const response = await fetch('http://127.0.0.1:8000/api/user-plants', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -595,13 +595,7 @@ export default function ProfileMe() {
                 <CardDescription>
                   Gérez votre collection de plantes
                 </CardDescription>
-                {plants.length > 0 && (
-                  <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
-                    <span>🚨 {plants.filter(p => p.nextWatering && new Date(p.nextWatering) <= new Date()).length} à arroser</span>
-                    <span>⚠️ {plants.filter(p => p.nextWatering && new Date(p.nextWatering) <= new Date(Date.now() + 24 * 60 * 60 * 1000) && new Date(p.nextWatering) > new Date()).length} bientôt</span>
-                    <span>🌿 {plants.filter(p => p.growthStage === 'Mature').length} matures</span>
-                  </div>
-                )}
+
               </div>
               <Button 
                 onClick={() => navigate('/dash/user')}

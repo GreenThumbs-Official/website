@@ -108,51 +108,6 @@ export default function UserIndex() {
     if (daysDiff >= 0) return 'Bonne';
     return 'Attention';
   };
-
-  const markAsWatered = async (plantId) => {
-    try {
-      const token = localStorage.getItem('access_token');
-      
-      if (!token) {
-        console.error('Aucun token trouvé');
-        return;
-      }
-      
-      const today = new Date().toISOString().split('T')[0];
-      
-      const response = await fetch(`http://127.0.0.1:8000/api/user-plants/${plantId}/water`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          last_watered: today
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-      
-      setUserPlants(prev => prev.map(plant => {
-        if (plant.id === plantId) {
-          const nextWatering = calculateNextWatering(today, plant.wateringFrequency);
-          const health = getPlantHealth(today, nextWatering);
-          return {
-            ...plant,
-            lastWatered: today,
-            nextWatering: nextWatering,
-            health: health
-          };
-        }
-        return plant;
-      }));
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour de l\'arrosage:', error);
-      alert('Une erreur est survenue lors de la mise à jour de l\'arrosage. Veuillez réessayer.');
-    }
-  };
   
   useEffect(() => {
     const fetchAvailablePlants = async () => {
@@ -234,15 +189,6 @@ export default function UserIndex() {
       header: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
-          <Button
-            size="sm"
-            onClick={() => markAsWatered(row.id)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs"
-            title="Marquer comme arrosé"
-          >
-            <Droplets className="w-3 h-3 mr-1" />
-            Arroser
-          </Button>
           <Button
             size="sm"
             variant="destructive"
