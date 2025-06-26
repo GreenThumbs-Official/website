@@ -1,4 +1,15 @@
 import React, { useState, useEffect } from 'react';
+
+// Fonction pour formater les dates en français
+const formatDateToFrench = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+};
 import { UnifiedDashboard } from '@/components/Dashboard';
 import { Button } from '@/components/ui/button';
 import {
@@ -182,15 +193,15 @@ export default function UserIndex() {
     },
     {
       header: 'Date de plantation',
-      accessor: 'plantedDate'
+      cell: (row) => formatDateToFrench(row.plantedDate)
     },
     {
       header: 'Dernier arrosage',
-      accessor: 'lastWatered'
+      cell: (row) => formatDateToFrench(row.lastWatered)
     },
     {
       header: 'Prochain arrosage',
-      accessor: 'nextWatering'
+      cell: (row) => formatDateToFrench(row.nextWatering)
     },
     {
       header: 'Santé',
