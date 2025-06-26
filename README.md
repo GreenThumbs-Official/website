@@ -46,6 +46,14 @@ niveaux. Que vous soyez débutant ou expérimenté, nous vous aidons à créer e
   npm run dev
 ```
 
+### 3. Setup unit test
+
+```shell
+  cd Back
+  php artisan test tests/Unit/FileName.php
+```
+
+
 ## Tâches / Sous-tâches
 
 ### Features
