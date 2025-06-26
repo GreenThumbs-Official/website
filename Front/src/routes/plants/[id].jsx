@@ -6,6 +6,7 @@ import config from '@/config.json';
 
 function Details(){
     const [tutorial, setTutorial] = useState(null);
+    const [tutorialLoading, setTutorialLoading] = useState(false);
     const [plantData, setPlantData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -57,9 +58,11 @@ function Details(){
     async function generatePlantTutorial() {
         if (!plantData) return;
 
-        delete plantData.image
-        try {
+        setTutorialLoading(true);
+        setTutorial(null);
 
+        delete plantData.image;
+        try {
             const response = await fetch(`http://127.0.0.1:8000/api/tutorials/${id}`, {
                 method: 'GET',
                 headers: {
@@ -71,15 +74,18 @@ function Details(){
                 const existingTutorial = await response.json();
                 if (existingTutorial) {
                     setTutorial(existingTutorial);
+                    setTutorialLoading(false);
                     return;
                 }
             }
         } catch (error) {
+            // Tu peux éventuellement gérer l'erreur ici
         }
 
-
         try {
-            const prompt = `Tu dois generer UNIQUEMENT un objet JSON valide pour un tutoriel de plante, sans aucun texte supplementaire avant ou apres. REGLES STRICTES: 1. Reponds UNIQUEMENT avec l'objet JSON, pas de texte explicatif 2. Utilise EXACTEMENT la structure fournie dans response_format 3. Ne pas inclure de texte, commentaires ou explications supplementaires 4. Assure-toi que l'objet JSON est valide et complet 5. Ne pas inclure de balises HTML, Markdown ou tout autre formatage 6. Tu dois lister plusieurs conseils dans chaque categorie, mais respecte la structure exacte DONNEES DE LA PLANTE: ${JSON.stringify(plantData.scientific_name).replace(/https:\/\//g, '').replace(/"/g, '').replace()} STRUCTURE EXACTE A SUIVRE: Voir response_format ci-dessous. Genere le JSON maintenant:`;            const body = {
+            const prompt = `Tu dois generer UNIQUEMENT un objet JSON valide pour un tutoriel de plante, sans aucun texte supplementaire avant ou apres. REGLES STRICTES: ... DONNEES DE LA PLANTE: ${JSON.stringify(plantData.scientific_name).replace(/https:\/\//g, '').replace(/"/g, '').replace()} STRUCTURE EXACTE A SUIVRE: Voir response_format ci-dessous. Genere le JSON maintenant:`;
+
+            const body = {
                 prompt: prompt,
                 response_syntax: 'json',
                 response_format: {
@@ -97,7 +103,7 @@ function Details(){
                     "saisons": {}
                 }
             };
-            // Make API call
+
             const response = await fetch('http://127.0.0.1:8000/api/handle-prompt', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -105,12 +111,13 @@ function Details(){
             });
 
             const data = await response.json();
-
-            setTutorial(data.response)
+            setTutorial(data.response);
 
         } catch (error) {
             console.error('Error generating plant tutorial:', error);
             setTutorial(null);
+        } finally {
+            setTutorialLoading(false);
         }
     }
 
@@ -196,13 +203,19 @@ function Details(){
                     </div>
                 </div>
             </div>
-            <button
-                onClick={generatePlantTutorial}
-                className="mt-6 px-6 py-2 bg-white bg-opacity-10 backdrop-blur-md border border-white border-opacity-20 rounded-lg text-white shadow-md hover:bg-opacity-20 transition"
-            >
-                Générer le tutoriel
-            </button>
-            {tutorial && renderTutorial(tutorial)}
+        <button
+            onClick={generatePlantTutorial}
+            className="mt-6 px-6 py-2 bg-white bg-opacity-10 backdrop-blur-md border border-white border-opacity-20 rounded-lg text-white shadow-md hover:bg-opacity-20 transition disabled:opacity-50"
+            disabled={tutorialLoading}
+        >
+            {tutorialLoading ? 'Chargement du tutoriel...' : 'Générer le tutoriel'}
+        </button>
+
+        {tutorialLoading && (
+            <div className="mt-4 text-white animate-pulse">Génération en cours, merci de patienter...</div>
+        )}
+
+        {tutorial && renderTutorial(tutorial)}
         </section>
     );
 }
