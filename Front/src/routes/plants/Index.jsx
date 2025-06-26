@@ -108,7 +108,7 @@ export default function PlantsPage() {
             <Background />
             <Header />
             {/* <PlantFilter /> */}
-            <h2 className="text-5xl font-light mt-28 ml-12 leading-tight">Les différentes plantes !</h2>
+            <h2 className="text-5xl font-light mt-28 ml-12 leading-tight">Les différents types de plantes !</h2>
             <Plants />
         </div>
     )
