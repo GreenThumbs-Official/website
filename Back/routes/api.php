@@ -28,14 +28,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/complete-onboarding', [AuthController::class, 'completeOnboarding']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
-    
+
     // Routes pour la gestion des plantes des utilisateurs
     Route::get('/user-plants', [UserPlantController::class, 'index']);
     Route::post('/user-plants', [UserPlantController::class, 'store']);
     Route::put('/user-plants/{plant}', [UserPlantController::class, 'update']);
     Route::delete('/user-plants/{plant}', [UserPlantController::class, 'destroy']);
     Route::put('/user-plants/{plant}/water', [UserPlantController::class, 'water']);
-    
+
     // Routes pour l'historique des arrosages
     Route::get('/user-plants/{plant}/watering-history', [UserPlantController::class, 'getWateringHistory']);
     Route::get('/watering-stats', [UserPlantController::class, 'getWateringStats']);
@@ -84,7 +84,7 @@ Route::delete('/advices/{advices}', [AdvicesController::class, 'destroy']);
 
 });
 
-/**
+    /**
  * Fallback route if resource isn't found
  */
 Route::fallback(function () {

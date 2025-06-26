@@ -24,25 +24,54 @@ import ChatBot from '@/components/ui/chatbot';
 
 export default function PlantCareGuide() {
   const [selectedPlant, setSelectedPlant] = useState(null);
+  const [guide, setGuide] = useState(null);
   const [plants, setPlants] = useState([]);
   const [isPlantDialogOpen, setIsPlantDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('general');
 
-  const mockPlants = [
-    {
+  useEffect(() => {
+    const fetchPlants = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch('http://localhost:8000/api/user-plants', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Erreur lors du chargement des plantes');
+        }
+        const data = await response.json();
+        setPlants(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPlants();
+  }, []);
+
+  const fetchGuide = async () => {
+    setLoading(true);
+    setError(null);
+
+    const responseFormat = `{
       id: 1,
       name: 'Mon Monstera',
       scientificName: 'Monstera deliciosa',
-      image: '/api/placeholder/200/200',
       difficulty: 'Facile',
-      category: 'Plante d\'intérieur',
+      category: 'Plante d\\'intérieur',
       care: {
         watering: {
           frequency: 'Une fois par semaine',
           amount: 'Modéré',
-          tips: 'Laissez sécher le sol entre les arrosages. Vérifiez l\'humidité en enfonçant votre doigt dans la terre.',
+          tips: 'Laissez sécher le sol entre les arrosages. Vérifiez l\\'humidité en enfonçant votre doigt dans la terre.',
           signs: {
             overwatering: 'Feuilles jaunissantes, sol détrempé',
             underwatering: 'Feuilles tombantes, sol très sec'
@@ -60,13 +89,13 @@ export default function PlantCareGuide() {
         temperature: {
           ideal: '18-27°C',
           minimum: '15°C',
-          tips: 'Évitez les courants d\'air froids et les sources de chaleur directes.',
+          tips: 'Évitez les courants d\\'air froids et les sources de chaleur directes.',
           humidity: '40-60%'
         },
         fertilizer: {
           frequency: 'Une fois par mois au printemps/été',
           type: 'Engrais liquide équilibré',
-          tips: 'Réduisez la fertilisation en automne/hiver. Diluez l\'engrais à la moitié de la concentration recommandée.'
+          tips: 'Réduisez la fertilisation en automne/hiver. Diluez l\\'engrais à la moitié de la concentration recommandée.'
         },
         pruning: {
           when: 'Printemps et été',
@@ -77,7 +106,7 @@ export default function PlantCareGuide() {
           {
             problem: 'Feuilles jaunissantes',
             causes: ['Arrosage excessif', 'Manque de lumière', 'Vieillissement naturel'],
-            solutions: ['Réduire l\'arrosage', 'Déplacer vers plus de lumière', 'Retirer les feuilles jaunes']
+            solutions: ['Réduire l\\'arrosage', 'Déplacer vers plus de lumière', 'Retirer les feuilles jaunes']
           },
           {
             problem: 'Taches brunes sur les feuilles',
@@ -86,172 +115,40 @@ export default function PlantCareGuide() {
           }
         ]
       }
-    },
-    {
-      id: 2,
-      name: 'Mon Ficus',
-      scientificName: 'Ficus benjamina',
-      image: '/api/placeholder/200/200',
-      difficulty: 'Modéré',
-      category: 'Plante d\'intérieur',
-      care: {
-        watering: {
-          frequency: 'Tous les 5-7 jours',
-          amount: 'Modéré à abondant',
-          tips: 'Maintenez le sol légèrement humide mais pas détrempé. Réduisez en hiver.',
-          signs: {
-            overwatering: 'Chute des feuilles, pourriture des racines',
-            underwatering: 'Feuilles flétries, sol très sec'
-          }
-        },
-        light: {
-          type: 'Lumière vive indirecte',
-          duration: '6-8 heures par jour',
-          tips: 'Peut tolérer un peu de soleil direct le matin. Tournez régulièrement pour une croissance uniforme.',
-          signs: {
-            tooMuch: 'Feuilles pâles, brûlures',
-            tooLittle: 'Chute des feuilles, croissance étiolée'
-          }
-        },
-        temperature: {
-          ideal: '16-24°C',
-          minimum: '10°C',
-          tips: 'Sensible aux changements brusques de température.',
-          humidity: '40-50%'
-        },
-        fertilizer: {
-          frequency: 'Toutes les 2 semaines au printemps/été',
-          type: 'Engrais liquide pour plantes vertes',
-          tips: 'Arrêtez la fertilisation en hiver. Préférez un engrais riche en azote.'
-        },
-        pruning: {
-          when: 'Printemps',
-          how: 'Taillez pour maintenir la forme désirée',
-          tips: 'Attention à la sève laiteuse qui peut être irritante. Portez des gants.'
-        },
-        commonProblems: [
-          {
-            problem: 'Chute massive des feuilles',
-            causes: ['Changement d\'environnement', 'Stress hydrique', 'Manque de lumière'],
-            solutions: ['Patience, adaptation normale', 'Ajuster l\'arrosage', 'Améliorer l\'éclairage']
-          }
-        ]
-      }
-    },
-    {
-      id: 3,
-      name: 'Mon Cactus',
-      scientificName: 'Echinocactus grusonii',
-      image: '/api/placeholder/200/200',
-      difficulty: 'Très facile',
-      category: 'Plante grasse',
-      care: {
-        watering: {
-          frequency: 'Toutes les 2-3 semaines',
-          amount: 'Peu',
-          tips: 'Arrosez abondamment puis laissez sécher complètement. Réduisez drastiquement en hiver.',
-          signs: {
-            overwatering: 'Ramollissement, pourriture',
-            underwatering: 'Ratatinement (rare)'
-          }
-        },
-        light: {
-          type: 'Plein soleil',
-          duration: '6+ heures par jour',
-          tips: 'Plus il y a de soleil, mieux c\'est. Peut être placé dehors en été.',
-          signs: {
-            tooMuch: 'Très rare, brunissement',
-            tooLittle: 'Étiolement, perte de forme'
-          }
-        },
-        temperature: {
-          ideal: '20-30°C',
-          minimum: '5°C',
-          tips: 'Résistant à la chaleur. Protégez du gel en hiver.',
-          humidity: '20-40%'
-        },
-        fertilizer: {
-          frequency: 'Une fois au printemps',
-          type: 'Engrais pour cactées',
-          tips: 'Très peu d\'engrais nécessaire. Évitez les engrais riches en azote.'
-        },
-        pruning: {
-          when: 'Rarement nécessaire',
-          how: 'Retirez les parties mortes ou malades',
-          tips: 'Utilisez des pinces pour éviter les épines. Laissez sécher les plaies.'
-        },
-        commonProblems: [
-          {
-            problem: 'Pourriture',
-            causes: ['Arrosage excessif', 'Mauvais drainage', 'Humidité excessive'],
-            solutions: ['Réduire l\'arrosage', 'Améliorer le drainage', 'Déplacer dans un endroit sec']
-          }
-        ]
-      }
-    },
-    {
-      id: 4,
-      name: 'Ma Pothos',
-      scientificName: 'Epipremnum aureum',
-      image: '/api/placeholder/200/200',
-      difficulty: 'Très facile',
-      category: 'Plante grimpante',
-      care: {
-        watering: {
-          frequency: 'Une fois par semaine',
-          amount: 'Modéré',
-          tips: 'Laissez sécher le sol entre les arrosages. Très tolérante aux oublis.',
-          signs: {
-            overwatering: 'Feuilles molles, jaunissement',
-            underwatering: 'Feuilles tombantes'
-          }
-        },
-        light: {
-          type: 'Lumière indirecte moyenne à vive',
-          duration: '4-6 heures par jour',
-          tips: 'Très adaptable. Peut survivre dans des conditions de faible luminosité.',
-          signs: {
-            tooMuch: 'Feuilles pâles',
-            tooLittle: 'Perte de panachure, croissance lente'
-          }
-        },
-        temperature: {
-          ideal: '18-29°C',
-          minimum: '10°C',
-          tips: 'Très tolérante aux variations de température.',
-          humidity: '30-50%'
-        },
-        fertilizer: {
-          frequency: 'Une fois par mois au printemps/été',
-          type: 'Engrais liquide dilué',
-          tips: 'Peut survivre sans engrais. Un excès peut brûler les racines.'
-        },
-        pruning: {
-          when: 'Toute l\'année',
-          how: 'Pincez les extrémités pour encourager la ramification',
-          tips: 'Excellente pour le bouturage. Les tiges coupées s\'enracinent facilement dans l\'eau.'
-        },
-        commonProblems: [
-          {
-            problem: 'Perte de panachure',
-            causes: ['Manque de lumière'],
-            solutions: ['Déplacer vers plus de lumière']
-          }
-        ]
-      }
-    }
-  ];
+    }`
+    const prompt = `Tu dois generer UNIQUEMENT un objet JSON valide pour un guide de soin de plante, sans aucun texte supplementaire avant ou apres. DONNEES DE LA PLANTE: ${JSON.stringify(selectedPlant)} STRUCTURE EXACTE A SUIVRE: Voir response_format ci-dessous. Genere le JSON maintenant:`;
 
-  useEffect(() => {
-    setTimeout(() => {
-      setPlants(mockPlants);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    const body = {
+      prompt: prompt,
+      response_syntax: 'json',
+      response_format: JSON.stringify(responseFormat)
+    };
+
+    try {
+        const response = await fetch('http://localhost:8000/api/handle-prompt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            throw new Error('Erreur lors de la génération du guide');
+        }
+
+        const guide = await response.json();
+        setGuide(guide.response);
+    } catch (err) {
+        setError(err.message);
+    }
+  }
+
+
 
   const managePlantSelect = (plantId) => {
-    const plant = plants.find(p => p.id === parseInt(plantId));
+    const plant = plants.find(p => p.id === plantId);
     setSelectedPlant(plant);
+    console.log(selectedPlant, plants)
+    fetchGuide();
     setIsPlantDialogOpen(false);
     setActiveTab('general');
   };
@@ -357,7 +254,7 @@ export default function PlantCareGuide() {
             {selectedPlant ? (
               <div className="flex items-center space-x-4">
                 <img 
-                  src={selectedPlant.image} 
+                  src={selectedPlant.image}
                   alt={selectedPlant.name}
                   className="w-20 h-20 rounded-lg object-cover"
                 />
@@ -382,7 +279,7 @@ export default function PlantCareGuide() {
           </CardContent>
         </Card>
 
-        {selectedPlant && (
+        {guide && (
           <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20">
             <CardHeader>
               <CardTitle className="text-white">Guide de soin détaillé</CardTitle>
@@ -429,31 +326,31 @@ export default function PlantCareGuide() {
                             <Droplets className="w-4 h-4 mr-2 text-blue-400" />
                             Arrosage
                           </span>
-                          <span className="text-white text-opacity-70">{selectedPlant.care.watering.frequency}</span>
+                          <span className="text-white text-opacity-70">{guide.care.watering.frequency}</span>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-white bg-opacity-10 rounded-lg">
                           <span className="text-white flex items-center">
                             <Sun className="w-4 h-4 mr-2 text-yellow-400" />
                             Lumière
                           </span>
-                          <span className="text-white text-opacity-70">{selectedPlant.care.light.type}</span>
+                          <span className="text-white text-opacity-70">{guide.care.light.type}</span>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-white bg-opacity-10 rounded-lg">
                           <span className="text-white flex items-center">
                             <Thermometer className="w-4 h-4 mr-2 text-red-400" />
                             Température
                           </span>
-                          <span className="text-white text-opacity-70">{selectedPlant.care.temperature.ideal}</span>
+                          <span className="text-white text-opacity-70">{guide.care.temperature.ideal}</span>
                         </div>
                       </div>
                     </div>
                     <div className="space-y-4">
                       <h3 className="text-white font-semibold text-lg">Informations générales</h3>
                       <div className="space-y-2 text-white text-opacity-80">
-                        <p><strong>Nom scientifique :</strong> {selectedPlant.scientificName}</p>
-                        <p><strong>Difficulté :</strong> {selectedPlant.difficulty}</p>
-                        <p><strong>Catégorie :</strong> {selectedPlant.category}</p>
-                        <p><strong>Humidité idéale :</strong> {selectedPlant.care.temperature.humidity}</p>
+                        <p><strong>Nom scientifique :</strong> {guide.scientificName}</p>
+                        <p><strong>Difficulté :</strong> {guide.difficulty}</p>
+                        <p><strong>Catégorie :</strong> {guide.category}</p>
+                        <p><strong>Humidité idéale :</strong> {guide.care.temperature.humidity}</p>
                       </div>
                     </div>
                   </div>
@@ -467,9 +364,9 @@ export default function PlantCareGuide() {
                           <CardTitle className="text-white text-lg">Fréquence et quantité</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                          <p className="text-white"><strong>Fréquence :</strong> {selectedPlant.care.watering.frequency}</p>
-                          <p className="text-white"><strong>Quantité :</strong> {selectedPlant.care.watering.amount}</p>
-                          <p className="text-white text-opacity-80 text-sm">{selectedPlant.care.watering.tips}</p>
+                          <p className="text-white"><strong>Fréquence :</strong> {guide.care.watering.frequency}</p>
+                          <p className="text-white"><strong>Quantité :</strong> {guide.care.watering.amount}</p>
+                          <p className="text-white text-opacity-80 text-sm">{guide.care.watering.tips}</p>
                         </CardContent>
                       </Card>
                       <Card className="bg-white bg-opacity-5">
@@ -479,11 +376,11 @@ export default function PlantCareGuide() {
                         <CardContent className="space-y-3">
                           <div>
                             <p className="text-red-300 font-semibold">Arrosage excessif :</p>
-                            <p className="text-white text-opacity-80 text-sm">{selectedPlant.care.watering.signs.overwatering}</p>
+                            <p className="text-white text-opacity-80 text-sm">{guide.care.watering.signs.overwatering}</p>
                           </div>
                           <div>
                             <p className="text-yellow-300 font-semibold">Manque d'eau :</p>
-                            <p className="text-white text-opacity-80 text-sm">{selectedPlant.care.watering.signs.underwatering}</p>
+                            <p className="text-white text-opacity-80 text-sm">{guide.care.watering.signs.underwatering}</p>
                           </div>
                         </CardContent>
                       </Card>
@@ -499,9 +396,9 @@ export default function PlantCareGuide() {
                           <CardTitle className="text-white text-lg">Besoins lumineux</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                          <p className="text-white"><strong>Type :</strong> {selectedPlant.care.light.type}</p>
-                          <p className="text-white"><strong>Durée :</strong> {selectedPlant.care.light.duration}</p>
-                          <p className="text-white text-opacity-80 text-sm">{selectedPlant.care.light.tips}</p>
+                          <p className="text-white"><strong>Type :</strong> {guide.care.light.type}</p>
+                          <p className="text-white"><strong>Durée :</strong> {guide.care.light.duration}</p>
+                          <p className="text-white text-opacity-80 text-sm">{guide.care.light.tips}</p>
                         </CardContent>
                       </Card>
                       <Card className="bg-white bg-opacity-5">
@@ -511,11 +408,11 @@ export default function PlantCareGuide() {
                         <CardContent className="space-y-3">
                           <div>
                             <p className="text-red-300 font-semibold">Trop de lumière :</p>
-                            <p className="text-white text-opacity-80 text-sm">{selectedPlant.care.light.signs.tooMuch}</p>
+                            <p className="text-white text-opacity-80 text-sm">{guide.care.light.signs.tooMuch}</p>
                           </div>
                           <div>
                             <p className="text-blue-300 font-semibold">Pas assez de lumière :</p>
-                            <p className="text-white text-opacity-80 text-sm">{selectedPlant.care.light.signs.tooLittle}</p>
+                            <p className="text-white text-opacity-80 text-sm">{guide.care.light.signs.tooLittle}</p>
                           </div>
                         </CardContent>
                       </Card>
@@ -532,14 +429,14 @@ export default function PlantCareGuide() {
                       <CardContent className="space-y-4">
                         <div className="grid md:grid-cols-2 gap-4">
                           <div>
-                            <p className="text-white"><strong>Température idéale :</strong> {selectedPlant.care.temperature.ideal}</p>
-                            <p className="text-white"><strong>Température minimum :</strong> {selectedPlant.care.temperature.minimum}</p>
+                            <p className="text-white"><strong>Température idéale :</strong> {guide.care.temperature.ideal}</p>
+                            <p className="text-white"><strong>Température minimum :</strong> {guide.care.temperature.minimum}</p>
                           </div>
                           <div>
-                            <p className="text-white"><strong>Humidité :</strong> {selectedPlant.care.temperature.humidity}</p>
+                            <p className="text-white"><strong>Humidité :</strong> {guide.care.temperature.humidity}</p>
                           </div>
                         </div>
-                        <p className="text-white text-opacity-80 text-sm">{selectedPlant.care.temperature.tips}</p>
+                        <p className="text-white text-opacity-80 text-sm">{guide.care.temperature.tips}</p>
                       </CardContent>
                     </Card>
                   </div>
@@ -553,9 +450,9 @@ export default function PlantCareGuide() {
                           <CardTitle className="text-white text-lg">Fertilisation</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                          <p className="text-white"><strong>Fréquence :</strong> {selectedPlant.care.fertilizer.frequency}</p>
-                          <p className="text-white"><strong>Type :</strong> {selectedPlant.care.fertilizer.type}</p>
-                          <p className="text-white text-opacity-80 text-sm">{selectedPlant.care.fertilizer.tips}</p>
+                          <p className="text-white"><strong>Fréquence :</strong> {guide.care.fertilizer.frequency}</p>
+                          <p className="text-white"><strong>Type :</strong> {guide.care.fertilizer.type}</p>
+                          <p className="text-white text-opacity-80 text-sm">{guide.care.fertilizer.tips}</p>
                         </CardContent>
                       </Card>
                       <Card className="bg-white bg-opacity-5">
@@ -563,9 +460,9 @@ export default function PlantCareGuide() {
                           <CardTitle className="text-white text-lg">Taille et entretien</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                          <p className="text-white"><strong>Quand :</strong> {selectedPlant.care.pruning.when}</p>
-                          <p className="text-white"><strong>Comment :</strong> {selectedPlant.care.pruning.how}</p>
-                          <p className="text-white text-opacity-80 text-sm">{selectedPlant.care.pruning.tips}</p>
+                          <p className="text-white"><strong>Quand :</strong> {guide.care.pruning.when}</p>
+                          <p className="text-white"><strong>Comment :</strong> {guide.care.pruning.how}</p>
+                          <p className="text-white text-opacity-80 text-sm">{guide.care.pruning.tips}</p>
                         </CardContent>
                       </Card>
                     </div>
@@ -576,7 +473,7 @@ export default function PlantCareGuide() {
                   <div className="space-y-6">
                     <h3 className="text-white font-semibold text-lg">Problèmes courants et solutions</h3>
                     <div className="space-y-4">
-                      {selectedPlant.care.commonProblems.map((problem, index) => (
+                      {guide.care.commonProblems.map((problem, index) => (
                         <Card key={index} className="bg-white bg-opacity-5">
                           <CardHeader>
                             <CardTitle className="text-lg text-red-300">{problem.problem}</CardTitle>

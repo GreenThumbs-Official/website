@@ -50,7 +50,7 @@ class GeminiController extends Controller
             "response_format" => $request->response_format ?? 'no example format provided',
         ];
 
-        $client = new Client("AIzaSyCYl6E40mBmhP-gg4tjeJ6u6cKfqPFV2sQ");
+        $client = new Client("AIzaSyC_NBuMoRC3ckJDBhSNjx7N8jKkNDOknzg");
 
         $generationConfig = (new GenerationConfig())->withTemperature(0.1);
 
