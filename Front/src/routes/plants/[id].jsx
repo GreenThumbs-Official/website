@@ -17,8 +17,14 @@ function Details(){
             try {
                 setLoading(true);
                 setError(null);
+                let response;
+                if (id.length !== 26) {
+                    response = await fetch(`https://perenual.com/api/v2/species/details/${id}?key=sk-Sofa685be57e475e411158`);
+                    }
+                else {
+                    response = await fetch(`http://localhost:8000/api/plants/${id}`);
+                }
 
-                const response = await fetch(`https://perenual.com/api/v2/species/details/${id}?key=sk-Sofa685be57e475e411158`);
 
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
@@ -61,7 +67,6 @@ function Details(){
         setTutorialLoading(true);
         setTutorial(null);
 
-        delete plantData.image;
         try {
             const response = await fetch(`http://127.0.0.1:8000/api/tutorials/${id}`, {
                 method: 'GET',
@@ -178,10 +183,10 @@ function Details(){
             <div className="max-w-4xl mx-auto bg-white bg-opacity-10 backdrop-blur-xl border border-white border-opacity-30 rounded-3xl shadow-xl p-8 transition-all duration-300">
 
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-                    {plantData.default_image && (
+                    {(plantData.default_image?.regular_url || plantData.image) && (
                         <img
-                            src={plantData.default_image.regular_url}
-                            alt={plantData.common_name}
+                            src={plantData.default_image?.regular_url ?? plantData.image}
+                            alt={plantData.common_name ?? 'image de la plante'}
                             className="w-64 h-64 object-cover rounded-lg shadow-lg"
                         />
                     )}
@@ -196,7 +201,7 @@ function Details(){
                                 <h4 className="text-lg font-semibold text-white mb-2">Caractéristiques</h4>
                                 <p className="text-white">Taille maximale : {formatMaxHeight(plantData.dimensions)}</p>
                                 {plantData.origin && plantData.origin.length > 0 && (
-                                    <p className="text-white">Origine : {plantData.origin.join(', ')}</p>
+                                    <p className="text-white">Origine : {Array.isArray(plantData.origin) ?  plantData.origin.join(', ') : plantData.origin}</p>
                                 )}
                             </div>
                         </div>
