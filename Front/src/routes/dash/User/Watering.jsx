@@ -220,6 +220,95 @@ export default function WateringCalendar() {
     );
   };
 
+  const waterPlantDirect = async (plantId) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return;
+      }
+      
+      const today = new Date().toISOString().split('T')[0];
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/user-plants/${plantId}/water`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          last_watered: today,
+          notes: `Arrosage effectué via le tableau`
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 422) {
+          // Erreur de validation (plante déjà arrosée aujourd'hui)
+          setError(errorData.message || 'Cette plante a déjà été arrosée aujourd\'hui');
+          return;
+        }
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const responseData = await response.json();
+      const newProgress = responseData.growth_progress;
+      
+      // Mettre à jour l'état des plantes
+      setPlants(prev => {
+        const updatedPlants = prev.map(plant => {
+          if (plant.id === plantId) {
+            let growthStage = plant.growthStage;
+            if (newProgress < 30) growthStage = 'Jeune';
+            else if (newProgress < 70) growthStage = 'En croissance';
+            else growthStage = 'Mature';
+            
+            return {
+              ...plant,
+              lastWatered: today,
+              growthProgress: newProgress,
+              growthStage: growthStage,
+              needsWater: false,
+              daysUntilNextWatering: plant.wateringFrequency,
+              health: 'Bonne'
+            };
+          }
+          return plant;
+        });
+        
+        // Recalculer les statistiques et le calendrier après l'arrosage
+        setTimeout(() => {
+          calculateStats();
+        }, 100);
+        
+        // Mettre à jour le calendrier avec les nouvelles données
+        generateWateringSchedule(updatedPlants);
+        
+        return updatedPlants;
+      });
+      
+      // Mettre à jour la plante sélectionnée si c'est celle qui a été arrosée
+      if (selectedPlant && selectedPlant.id === plantId) {
+        setSelectedPlant(prev => ({
+          ...prev,
+          lastWatered: today,
+          growthProgress: newProgress,
+          growthStage: newProgress < 30 ? 'Jeune' : 
+                      newProgress < 70 ? 'En croissance' : 
+                      'Mature',
+          needsWater: false,
+          daysUntilNextWatering: prev.wateringFrequency,
+          health: 'Bonne'
+        }));
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'arrosage:', error);
+      setError('Erreur lors de l\'arrosage');
+    }
+  };
+
   const markAsWatered = async (eventId) => {
     try {
       const event = wateringSchedule.find(e => e.id === eventId);
@@ -247,8 +336,17 @@ export default function WateringCalendar() {
       });
       
       if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 422) {
+          // Erreur de validation (plante déjà arrosée aujourd'hui)
+          setError(errorData.message || 'Cette plante a déjà été arrosée aujourd\'hui');
+          return;
+        }
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
+      
+      const responseData = await response.json();
+      const newProgress = responseData.growth_progress;
       
       // Mettre à jour l'état local
       setWateringSchedule(prev => 
@@ -263,8 +361,6 @@ export default function WateringCalendar() {
         setPlants(prev => {
           const updatedPlants = prev.map(plant => {
             if (plant.id === selectedPlant.id) {
-              const newProgress = Math.min(plant.growthProgress + 5, 100);
-              
               let growthStage = plant.growthStage;
               if (newProgress < 30) growthStage = 'Jeune';
               else if (newProgress < 70) growthStage = 'En croissance';
@@ -297,9 +393,9 @@ export default function WateringCalendar() {
         setSelectedPlant(prev => ({
           ...prev,
           lastWatered: today,
-          growthProgress: Math.min(prev.growthProgress + 5, 100),
-          growthStage: prev.growthProgress + 5 < 30 ? 'Jeune' : 
-                      prev.growthProgress + 5 < 70 ? 'En croissance' : 
+          growthProgress: newProgress,
+          growthStage: newProgress < 30 ? 'Jeune' : 
+                      newProgress < 70 ? 'En croissance' : 
                       'Mature',
           needsWater: false,
           daysUntilNextWatering: prev.wateringFrequency,
@@ -720,19 +816,17 @@ export default function WateringCalendar() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {plant.needsWater && (
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  const today = new Date().toISOString().split('T')[0];
-                                  markAsWatered(`${plant.id}-water`);
-                                }}
-                                className="bg-blue-600 hover:bg-blue-700 text-white"
-                              >
-                                <Droplets className="w-4 h-4 mr-1" />
-                                Arroser
-                              </Button>
-                            )}
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                waterPlantDirect(plant.id);
+                              }}
+                              disabled={!plant.needsWater}
+                              className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <Droplets className="w-4 h-4 mr-1" />
+                              {plant.needsWater ? 'Arroser' : 'Arrosé'}
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -756,15 +850,21 @@ export default function WateringCalendar() {
                       {getWateringEventsForDate(selectedDate).map((event) => (
                         <div key={event.id} className="flex items-center justify-between p-3 bg-white bg-opacity-10 rounded-lg">
                           <span className="text-white">{event.plantName}</span>
-                          {!event.watered && (
-                            <Button
-                              size="sm"
-                              onClick={() => markAsWatered(event.id)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white"
-                            >
-                              Marquer comme arrosé
-                            </Button>
-                          )}
+                          {(() => {
+                            const plant = plants.find(p => p.id === event.plantId);
+                            const canWater = plant && plant.needsWater;
+                            
+                            return (
+                              <Button
+                                size="sm"
+                                onClick={() => canWater ? markAsWatered(event.id) : null}
+                                disabled={!canWater}
+                                className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {canWater ? 'Marquer comme arrosé' : 'Déjà arrosé'}
+                              </Button>
+                            );
+                          })()}
                           {event.watered && (
                             <span className="text-green-400 text-sm">✅ Arrosé</span>
                           )}

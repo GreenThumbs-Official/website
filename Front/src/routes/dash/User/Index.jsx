@@ -132,8 +132,15 @@ export default function UserIndex() {
       });
       
       if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 422) {
+          alert(errorData.message || 'Cette plante a déjà été arrosée aujourd\'hui');
+          return;
+        }
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
+      
+      const responseData = await response.json();
       
       setUserPlants(prev => prev.map(plant => {
         if (plant.id === plantId) {
@@ -237,11 +244,12 @@ export default function UserIndex() {
           <Button
             size="sm"
             onClick={() => markAsWatered(row.id)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs"
-            title="Marquer comme arrosé"
+            disabled={row.health === 'Excellente' || row.health === 'Bonne'}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+            title={row.health === 'Excellente' || row.health === 'Bonne' ? 'Plante déjà arrosée' : 'Marquer comme arrosé'}
           >
             <Droplets className="w-3 h-3 mr-1" />
-            Arroser
+            {row.health === 'Excellente' || row.health === 'Bonne' ? 'Arrosé' : 'Arroser'}
           </Button>
           <Button
             size="sm"

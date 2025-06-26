@@ -213,15 +213,21 @@ class UserPlantController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
             
-            // Mettre à jour la date d'arrosage dans la table pivot
+            // Calculer la nouvelle progression de croissance
+            $currentProgress = $userPlant->pivot->growth_progress ?? 0;
+            $newProgress = min($currentProgress + 5, 100);
+            
+            // Mettre à jour la date d'arrosage et la progression dans la table pivot
             $user->favoritePlants()->updateExistingPivot($plantId, [
                 'last_watered' => $wateredDate->format('Y-m-d'),
+                'growth_progress' => $newProgress,
             ]);
             
             return response()->json([
                 'message' => 'Plant watering recorded successfully',
                 'watered_date' => $wateredDate->format('Y-m-d'),
-                'plant_name' => $userPlant->pivot->custom_name ?? $userPlant->name
+                'plant_name' => $userPlant->pivot->custom_name ?? $userPlant->name,
+                'growth_progress' => $newProgress
             ]);
             
         } catch (\Illuminate\Validation\ValidationException $e) {
