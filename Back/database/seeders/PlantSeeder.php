@@ -17,7 +17,7 @@ class PlantSeeder extends Seeder
             'image' => 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80',
             'origin' => 'Amérique centrale',
             'length' => 200,
-            'fruit_production_month' => null,
+            'fruit_production_month' => 6,
             'max_temp' => 30,
             'min_temp' => 15
         ]);
@@ -27,7 +27,7 @@ class PlantSeeder extends Seeder
             'image' => 'https://images.unsplash.com/photo-1616690710400-a16d146927c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80',
             'origin' => 'Afrique de l\'Ouest',
             'length' => 300,
-            'fruit_production_month' => null,
+            'fruit_production_month' => 6,
             'max_temp' => 30,
             'min_temp' => 16
         ]);
@@ -37,7 +37,7 @@ class PlantSeeder extends Seeder
             'image' => 'https://images.unsplash.com/photo-1622398925373-3f91b1e275f5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80',
             'origin' => 'Asie du Sud-Est',
             'length' => 150,
-            'fruit_production_month' => null,
+            'fruit_production_month' => 6,
             'max_temp' => 32,
             'min_temp' => 12
         ]);
@@ -47,7 +47,7 @@ class PlantSeeder extends Seeder
             'image' => 'https://images.unsplash.com/photo-1593482892290-f54927ae2b7a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80',
             'origin' => 'Afrique',
             'length' => 120,
-            'fruit_production_month' => null,
+            'fruit_production_month' => 6,
             'max_temp' => 35,
             'min_temp' => 10
         ]);
@@ -57,7 +57,7 @@ class PlantSeeder extends Seeder
             'image' => 'https://images.unsplash.com/photo-1602923668104-8d8f8b9bc7f4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80',
             'origin' => 'Amérique du Sud',
             'length' => 80,
-            'fruit_production_month' => null,
+            'fruit_production_month' => 6,
             'max_temp' => 28,
             'min_temp' => 18
         ]);
@@ -67,7 +67,7 @@ class PlantSeeder extends Seeder
             'image' => 'https://images.unsplash.com/photo-1632207691143-7ee8c82f6e9f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80',
             'origin' => 'Afrique de l\'Est',
             'length' => 90,
-            'fruit_production_month' => null,
+            'fruit_production_month' => 6,
             'max_temp' => 30,
             'min_temp' => 15
         ]);
