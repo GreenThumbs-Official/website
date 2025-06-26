@@ -31,6 +31,7 @@ import Sidebar from '@/components/Nav/Sidebar';
 import { format, addDays, isSameDay, parseISO, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Droplets, TrendingUp, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import ChatBot from '@/components/ui/chatbot';
 
 export default function WateringCalendar() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -938,6 +939,7 @@ export default function WateringCalendar() {
           </div>
         )}
       </div>
+      <ChatBot />
     </Sidebar>
   );
 }

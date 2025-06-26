@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Sidebar from '@/components/Nav/Sidebar';
 import { Plus, Leaf, Calendar, Droplets, Trash2, CheckCircle, Edit } from 'lucide-react';
+import ChatBot from '@/components/ui/chatbot';
 
 export default function UserIndex() {
   const [userPlants, setUserPlants] = useState([]);
@@ -885,6 +886,7 @@ export default function UserIndex() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ChatBot />
     </>
   );
 }
