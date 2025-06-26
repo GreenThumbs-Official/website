@@ -15,7 +15,7 @@ export default function Hero() {
         </div>
         <div className="relative">
           <img
-            src="https://placehold.co/600"
+            src="/heroimg.jpg"
             alt="Cactus"
             className="w-full h-auto rounded-3xl"
           />

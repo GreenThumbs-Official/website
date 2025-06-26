@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Header from "@/components/Nav/Header";
 import Background from "@/components/ui/background";
-
+ 
 export default function Contact() {
     const manageSubmit = async (e) => {
         e.preventDefault();
