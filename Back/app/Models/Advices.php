@@ -13,7 +13,8 @@ class Advices extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'title',
+        'name',
         'description',
+        'category',
     ];
 }

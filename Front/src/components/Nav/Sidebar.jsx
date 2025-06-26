@@ -6,13 +6,15 @@ export default function Sidebar ({ className, children, userType = 'user', ...pr
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const adminMenuItems = [
+    { label: 'Home', href: '/', icon: '🏠' },
     { label: 'Dashboard', href: '/dash/Admin', icon: '📊' },
     { label: 'Utilisateurs', href: '/dash/admin/users', icon: '👥' },
     { label: 'Plantes', href: '/dash/admin/plants', icon: '🌱' },
-    { label: 'Conseils', href: '/dash/admin/advices', icon: '👥' },
+    { label: 'Conseils', href: '/dash/admin/advices', icon: '💡' },
   ];
 
   const userMenuItems = [
+    { label: 'Home', href: '/', icon: '🏠' },
     { label: 'Ma Collection', href: '/dash/user', icon: '🌿' },
     { label: 'Calendrier d\'arrosage', href: '/dash/user/watering', icon: '💧' },
     { label: 'Guide de soins', href: '/dash/user/guide', icon: '📖' },
