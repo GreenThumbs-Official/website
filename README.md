@@ -1,6 +1,6 @@
 # GreenThumbs
 
-...
+niveaux. Que vous soyez débutant ou expérimenté, nous vous aidons à créer et entretenir un potager à domicile, que vous viviez en appartement ou en maison.
 
 ## Prerequisites
 
