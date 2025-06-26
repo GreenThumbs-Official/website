@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import useRouter from "@/lib/hooks/useRouter";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import NotFound from "@/components/NotFound";
 
 
 export default function App() {
@@ -40,7 +41,7 @@ export default function App() {
             element={renderRouteElement(path, Component)} 
           />
         ))}
-        <Route path="*" element={<h1>404: Not found</h1>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
