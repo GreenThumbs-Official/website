@@ -137,3 +137,13 @@ git merge main --no-edit
 # Push main avec les changement de sa branche
 git push origin ta-branche
 ```
+
+### DEV NOTES
+
+Dû à tous les problèmes (absence), nous n'avons pas pu terminer le projet comme on l'aurait voulu, le MVP est disponible, la V1 aussi mais pour la V2 il resterait à faire : 
+
+- Verifier la date du dernier arrosage pour que ce soit correspondant avec la date de pousse sinon on renvoie une erreur sur dash/user/watering
+- Revoir le système de barre de progression de la plante par rapport à la date de plantation
+
+**Je précise qu'un utilisateur peut enregistrer une seule plante du même type.**
+**Je précise également que le projet est totalement fonctionnel mais que les messages d'erreurs (normaux) ne sont pas forcément intuitives.**
