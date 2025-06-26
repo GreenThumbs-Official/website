@@ -58,10 +58,14 @@ niveaux. Que vous soyez débutant ou expérimenté, nous vous aidons à créer e
 - ✅ Ajout d'un utilisateur - 2h
 - ✅ Modification d'un utilisateur - 0.5h
 - ✅ Suppression d'un utilisateur - 0.5h
+- ✅ Ajout d'un conseil - 2h
+- ✅ Modification d'un conseil - 0.5h
+- ✅ Suppression d'un conseil - 0.5h
 - ✅ Ajout d'un rôle sur un utilisateur
 - ✅ Dashboard admin - 8h
 - ✅ Page d'authentification - 2h
 - ✅ Affichage de la page 404 - 0.5h
+- ✅ Calendrier / guide complet - 4h
 
 ### Développement du site - 4h
 
