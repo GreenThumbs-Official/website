@@ -100,7 +100,7 @@ export default function WateringCalendar() {
               growthStage: growthProgress < 30 ? 'Jeune' : growthProgress < 70 ? 'En croissance' : 'Mature',
               needsWater: daysSinceWatering >= wateringFreq,
               daysUntilNextWatering: Math.max(0, wateringFreq - daysSinceWatering),
-              health: daysSinceWatering <= wateringFreq ? 'Bonne' : daysSinceWatering <= wateringFreq + 2 ? 'Moyenne' : 'Faible'
+              health: daysSinceWatering <= wateringFreq / 2 ? 'Excellente' : daysSinceWatering <= wateringFreq ? 'Bonne' : daysSinceWatering <= wateringFreq + 2 ? 'Moyenne' : 'Faible'
             };
           });
           
@@ -272,7 +272,7 @@ export default function WateringCalendar() {
               growthStage: growthStage,
               needsWater: false,
               daysUntilNextWatering: plant.wateringFrequency,
-              health: 'Bonne'
+              health: 'Excellente'
             };
           }
           return plant;
@@ -300,7 +300,7 @@ export default function WateringCalendar() {
                       'Mature',
           needsWater: false,
           daysUntilNextWatering: prev.wateringFrequency,
-          health: 'Bonne'
+          health: 'Excellente'
         }));
       }
     } catch (error) {
@@ -373,7 +373,7 @@ export default function WateringCalendar() {
                 growthStage: growthStage,
                 needsWater: false,
                 daysUntilNextWatering: plant.wateringFrequency,
-                health: 'Bonne'
+                health: 'Excellente'
               };
             }
             return plant;
@@ -399,7 +399,7 @@ export default function WateringCalendar() {
                       'Mature',
           needsWater: false,
           daysUntilNextWatering: prev.wateringFrequency,
-          health: 'Bonne'
+          health: 'Excellente'
         }));
       }
     } catch (error) {
@@ -691,8 +691,9 @@ export default function WateringCalendar() {
                       <Badge 
                         variant="outline" 
                         className={`border-opacity-30 ${
-                          selectedPlant.health === 'Bonne' ? 'text-green-400 border-green-400' :
-                          selectedPlant.health === 'Moyenne' ? 'text-yellow-400 border-yellow-400' :
+                          selectedPlant.health === 'Excellente' ? 'text-emerald-400 border-emerald-400' :
+                selectedPlant.health === 'Bonne' ? 'text-green-400 border-green-400' :
+                selectedPlant.health === 'Moyenne' ? 'text-yellow-400 border-yellow-400' :
                           'text-red-400 border-red-400'
                         }`}
                       >
@@ -794,8 +795,9 @@ export default function WateringCalendar() {
                             <Badge 
                               variant="outline" 
                               className={`border-opacity-30 ${
-                                plant.health === 'Bonne' ? 'text-green-400 border-green-400' :
-                                plant.health === 'Moyenne' ? 'text-yellow-400 border-yellow-400' :
+                                plant.health === 'Excellente' ? 'text-emerald-400 border-emerald-400' :
+                plant.health === 'Bonne' ? 'text-green-400 border-green-400' :
+                plant.health === 'Moyenne' ? 'text-yellow-400 border-yellow-400' :
                                 'text-red-400 border-red-400'
                               }`}
                             >
