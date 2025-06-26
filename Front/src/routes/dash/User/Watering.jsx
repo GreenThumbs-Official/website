@@ -106,7 +106,6 @@ export default function WateringCalendar() {
           
           setPlants(formattedPlants);
           generateWateringSchedule(formattedPlants);
-          calculateStats(formattedPlants);
         }
       } catch (error) {
         console.error('Erreur lors de la récupération des plantes:', error);
@@ -118,28 +117,58 @@ export default function WateringCalendar() {
     
     fetchUserPlants();
   }, []);
+  
+  // Charger les statistiques après que les plantes soient chargées
+  useEffect(() => {
+    if (plants.length > 0) {
+      calculateStats();
+    }
+  }, [plants]);
 
-  const calculateStats = (plantsData) => {
-    const today = new Date();
-    const weekAgo = addDays(today, -7);
-    
-    const totalWaterings = plantsData.reduce((total, plant) => {
-      const lastWatered = parseISO(plant.lastWatered);
-      return total + (lastWatered >= weekAgo ? 1 : 0);
-    }, 0);
-    
-    const averageGrowth = plantsData.length > 0 
-      ? Math.round(plantsData.reduce((sum, plant) => sum + plant.growthProgress, 0) / plantsData.length)
-      : 0;
-    
-    const plantsNeedingWater = plantsData.filter(plant => plant.needsWater).length;
-    
-    setWateringStats({
-      totalWaterings,
-      weeklyWaterings: totalWaterings,
-      averageGrowth,
-      plantsNeedingWater
-    });
+  const calculateStats = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return;
+      }
+      
+      const response = await fetch('http://127.0.0.1:8000/api/watering-stats', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 422) {
+          // Erreur de validation (date future ou plante déjà arrosée)
+          console.error('Erreur de validation:', errorData.message);
+          setError(errorData.message || 'Impossible d\'arroser cette plante');
+          return;
+        }
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const stats = await response.json();
+      
+      // Calculer la croissance moyenne depuis les plantes locales
+      const averageGrowth = plants.length > 0 
+        ? Math.round(plants.reduce((sum, plant) => sum + plant.growthProgress, 0) / plants.length)
+        : 0;
+      
+      setWateringStats({
+        totalWaterings: stats.weekly_waterings,
+        weeklyWaterings: stats.weekly_waterings,
+        averageGrowth: averageGrowth,
+        plantsNeedingWater: stats.plants_needing_water
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des statistiques:', error);
+    }
   };
 
   const generateWateringSchedule = (plantsData) => {
@@ -212,7 +241,8 @@ export default function WateringCalendar() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          last_watered: today
+          last_watered: today,
+          notes: `Arrosage effectué via le calendrier`
         })
       });
       
@@ -252,10 +282,16 @@ export default function WateringCalendar() {
             }
             return plant;
           });
-          
-          // Recalculer les statistiques
-          calculateStats(updatedPlants);
-          return updatedPlants;
+        
+        // Recalculer les statistiques et le calendrier après l'arrosage
+        setTimeout(() => {
+          calculateStats();
+        }, 100);
+        
+        // Mettre à jour le calendrier avec les nouvelles données
+        generateWateringSchedule(updatedPlants);
+        
+        return updatedPlants;
         });
         
         setSelectedPlant(prev => ({
