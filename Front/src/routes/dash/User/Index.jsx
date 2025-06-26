@@ -34,7 +34,11 @@ export default function UserIndex() {
     name: '',
     type: '',
     lastWatered: '',
-    wateringFrequency: 7
+    plantedDate: '',
+    description: '',
+    origin: '',
+    wateringFrequency: 7,
+    image: ''
   });
 
   useEffect(() => {
@@ -69,6 +73,7 @@ export default function UserIndex() {
             name: plant.name,
             type: plant.type || plant.name, 
             lastWatered: plant.last_watered || new Date().toISOString().split('T')[0],
+            plantedDate: plant.planted_date || new Date().toISOString().split('T')[0],
             wateringFrequency: plant.watering_frequency || 7,
             nextWatering: calculateNextWatering(plant.last_watered || new Date().toISOString().split('T')[0], plant.watering_frequency || 7),
             health: getPlantHealth(plant.last_watered || new Date().toISOString().split('T')[0], 
@@ -202,6 +207,10 @@ export default function UserIndex() {
       accessor: 'name'
     },
     {
+      header: 'Date de plantation',
+      accessor: 'plantedDate'
+    },
+    {
       header: 'Dernier arrosage',
       accessor: 'lastWatered'
     },
@@ -253,8 +262,8 @@ export default function UserIndex() {
   ];
 
   const manageAddPlant = async () => {
-    if (!newPlant.name || !newPlant.type || !newPlant.lastWatered) {
-      alert('Veuillez remplir tous les champs');
+    if (!newPlant.name || !newPlant.type || !newPlant.lastWatered || !newPlant.plantedDate || !newPlant.description || !newPlant.origin) {
+      alert('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
@@ -271,7 +280,11 @@ export default function UserIndex() {
         name: newPlant.name,
         type: selectedPlantType.name,
         last_watered: newPlant.lastWatered,
-        watering_frequency: selectedPlantType.frequency
+        planted_date: newPlant.plantedDate,
+        description: newPlant.description,
+        origin: newPlant.origin,
+        watering_frequency: newPlant.wateringFrequency,
+        image: newPlant.image
       };
       
       const response = await fetch('http://127.0.0.1:8000/api/user-plants', {
@@ -297,13 +310,14 @@ export default function UserIndex() {
         name: newPlant.name,
         type: selectedPlantType.name,
         lastWatered: newPlant.lastWatered,
+        plantedDate: newPlant.plantedDate,
         nextWatering: nextWatering,
         health: health,
         wateringFrequency: selectedPlantType.frequency
       };
 
       setUserPlants(prev => [...prev, plantToAdd]);
-      setNewPlant({ name: '', type: '', lastWatered: '', wateringFrequency: 7 });
+      setNewPlant({ name: '', type: '', lastWatered: '', plantedDate: '', description: '', origin: '', wateringFrequency: 7, image: '' });
       setIsAddPlantDialogOpen(false);
     } catch (error) {
       console.error('Erreur lors de l\'ajout de la plante:', error);
@@ -433,6 +447,60 @@ export default function UserIndex() {
                           </Select>
                         </div>
                         <div className="space-y-2">
+                          <Label htmlFor="planted-date">Date de plantation</Label>
+                          <Input
+                            id="planted-date"
+                            type="date"
+                            value={newPlant.plantedDate}
+                            onChange={(e) => setNewPlant(prev => ({ ...prev, plantedDate: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                            max={new Date().toISOString().split('T')[0]}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="description">Description</Label>
+                          <Input
+                            id="description"
+                            placeholder="Ex: Belle plante verte d'intérieur"
+                            value={newPlant.description}
+                            onChange={(e) => setNewPlant(prev => ({ ...prev, description: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="origin">Origine</Label>
+                          <Input
+                            id="origin"
+                            placeholder="Ex: Amérique du Sud"
+                            value={newPlant.origin}
+                            onChange={(e) => setNewPlant(prev => ({ ...prev, origin: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="watering-frequency">Fréquence d'arrosage (jours)</Label>
+                          <Input
+                            id="watering-frequency"
+                            type="number"
+                            min="1"
+                            max="30"
+                            value={newPlant.wateringFrequency}
+                            onChange={(e) => setNewPlant(prev => ({ ...prev, wateringFrequency: parseInt(e.target.value) || 7 }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="image">Image (optionnel)</Label>
+                          <Input
+                            id="image"
+                            type="url"
+                            placeholder="Ex: https://exemple.com/image.jpg"
+                            value={newPlant.image}
+                            onChange={(e) => setNewPlant(prev => ({ ...prev, image: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        </div>
+                        <div className="space-y-2">
                           <Label htmlFor="last-watered">Dernier arrosage</Label>
                           <Input
                             id="last-watered"
@@ -530,6 +598,60 @@ export default function UserIndex() {
               </Select>
             </div>
             <div className="space-y-2">
+              <Label htmlFor="planted-date">Date de plantation</Label>
+              <Input
+                id="planted-date"
+                type="date"
+                value={newPlant.plantedDate}
+                onChange={(e) => setNewPlant(prev => ({ ...prev, plantedDate: e.target.value }))}
+                className="bg-gray-800 border-gray-700 text-white"
+                max={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                placeholder="Ex: Belle plante verte d'intérieur"
+                value={newPlant.description}
+                onChange={(e) => setNewPlant(prev => ({ ...prev, description: e.target.value }))}
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="origin">Origine</Label>
+              <Input
+                id="origin"
+                placeholder="Ex: Amérique du Sud"
+                value={newPlant.origin}
+                onChange={(e) => setNewPlant(prev => ({ ...prev, origin: e.target.value }))}
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="watering-frequency">Fréquence d'arrosage (jours)</Label>
+              <Input
+                id="watering-frequency"
+                type="number"
+                min="1"
+                max="30"
+                value={newPlant.wateringFrequency}
+                onChange={(e) => setNewPlant(prev => ({ ...prev, wateringFrequency: parseInt(e.target.value) || 7 }))}
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="image">Image (optionnel)</Label>
+              <Input
+                id="image"
+                type="url"
+                placeholder="Ex: https://exemple.com/image.jpg"
+                value={newPlant.image}
+                onChange={(e) => setNewPlant(prev => ({ ...prev, image: e.target.value }))}
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="last-watered">Dernier arrosage</Label>
               <Input
                 id="last-watered"
@@ -546,7 +668,7 @@ export default function UserIndex() {
               variant="outline" 
               onClick={() => {
                 setIsAddPlantDialogOpen(false);
-                setNewPlant({ name: '', type: '', lastWatered: '', wateringFrequency: 7 });
+                setNewPlant({ name: '', type: '', lastWatered: '', plantedDate: '', description: '', origin: '', wateringFrequency: 7, image: '' });
               }}
               className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
             >

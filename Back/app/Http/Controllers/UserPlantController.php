@@ -23,14 +23,15 @@ class UserPlantController extends Controller
                 'id' => $plant->id,
                 'name' => $plant->pivot->custom_name ?? $plant->name, 
                 'type' => $plant->name, 
-                'description' => $plant->description,
-                'image' => $plant->image,
-                'origin' => $plant->origin,
+                'description' => $plant->pivot->description ?? $plant->description,
+                'image' => $plant->pivot->image ?? $plant->image,
+                'origin' => $plant->pivot->origin ?? $plant->origin,
                 'length' => $plant->length,
                 'fruit_production_month' => $plant->fruit_production_month,
                 'max_temp' => $plant->max_temp,
                 'min_temp' => $plant->min_temp,
                 'last_watered' => $plant->pivot->last_watered ?? null,
+                'planted_date' => $plant->pivot->planted_date ?? null,
                 'watering_frequency' => $plant->pivot->watering_frequency ?? 7,
             ];
         });
@@ -48,7 +49,11 @@ class UserPlantController extends Controller
                 'name' => 'required|string|max:255',
                 'type' => 'required|string|max:255',
                 'last_watered' => 'required|date',
+                'planted_date' => 'required|date',
+                'description' => 'required|string|max:500',
+                'origin' => 'required|string|max:255',
                 'watering_frequency' => 'required|integer|min:1|max:30',
+                'image' => 'nullable|url|max:500',
             ]);
             
             $user = Auth::user();
@@ -85,7 +90,11 @@ class UserPlantController extends Controller
                 // Mettre à jour les données du pivot au lieu d'ajouter une nouvelle entrée
                 $user->favoritePlants()->updateExistingPivot($plant->id, [
                     'last_watered' => $validated['last_watered'],
+                    'planted_date' => $validated['planted_date'],
+                    'description' => $validated['description'],
+                    'origin' => $validated['origin'],
                     'watering_frequency' => $validated['watering_frequency'],
+                    'image' => $validated['image'],
                     'custom_name' => $validated['name'], 
                 ]);
             } else {
@@ -94,7 +103,11 @@ class UserPlantController extends Controller
                 // Ajouter la plante à la collection de l'utilisateur avec les données du pivot
                 $user->favoritePlants()->attach($plant->id, [
                     'last_watered' => $validated['last_watered'],
+                    'planted_date' => $validated['planted_date'],
+                    'description' => $validated['description'],
+                    'origin' => $validated['origin'],
                     'watering_frequency' => $validated['watering_frequency'],
+                    'image' => $validated['image'],
                     'custom_name' => $validated['name'],
                 ]);
             }
