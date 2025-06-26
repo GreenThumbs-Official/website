@@ -26,7 +26,7 @@ class Plant extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_plants')
-                    ->withPivot('last_watered', 'watering_frequency', 'custom_name')
+                    ->withPivot('last_watered', 'watering_frequency', 'custom_name', 'description', 'origin', 'image', 'planted_date', 'growth_progress')
                     ->withTimestamps();
     }
 }
