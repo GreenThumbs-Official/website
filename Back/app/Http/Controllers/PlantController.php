@@ -13,7 +13,41 @@ class PlantController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        $plants = Plant::paginate($perPage);
+        $query = Plant::query();
+
+        // Filtres disponibles
+        if ($request->has('origin') && $request->origin) {
+            $query->where('origin', 'like', '%' . $request->origin . '%');
+        }
+
+        if ($request->has('fruit_production_month') && $request->fruit_production_month) {
+            $query->where('fruit_production_month', $request->fruit_production_month);
+        }
+
+        if ($request->has('min_temp') && $request->min_temp) {
+            $query->where('min_temp', '>=', $request->min_temp);
+        }
+
+        if ($request->has('max_temp') && $request->max_temp) {
+            $query->where('max_temp', '<=', $request->max_temp);
+        }
+
+        if ($request->has('length_min') && $request->length_min) {
+            $query->where('length', '>=', $request->length_min);
+        }
+
+        if ($request->has('length_max') && $request->length_max) {
+            $query->where('length', '<=', $request->length_max);
+        }
+
+        if ($request->has('search') && $request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $plants = $query->paginate($perPage);
 
         return response()->json($plants);
     }
