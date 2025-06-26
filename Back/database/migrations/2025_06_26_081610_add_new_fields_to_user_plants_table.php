@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('user_plants', function (Blueprint $table) {
-            $table->date('planted_date')->nullable()->after('last_watered');
+            $table->text('description')->nullable()->after('watering_frequency');
+            $table->string('origin')->nullable()->after('description');
+            $table->string('image')->nullable()->after('origin');
         });
     }
 
@@ -22,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('user_plants', function (Blueprint $table) {
-            $table->dropColumn('planted_date');
+            $table->dropColumn(['description', 'origin', 'image']);
         });
     }
 };

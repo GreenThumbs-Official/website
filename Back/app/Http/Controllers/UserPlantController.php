@@ -23,9 +23,9 @@ class UserPlantController extends Controller
                 'id' => $plant->id,
                 'name' => $plant->pivot->custom_name ?? $plant->name, 
                 'type' => $plant->name, 
-                'description' => $plant->description,
-                'image' => $plant->image,
-                'origin' => $plant->origin,
+                'description' => $plant->pivot->description ?? $plant->description,
+                'image' => $plant->pivot->image ?? $plant->image,
+                'origin' => $plant->pivot->origin ?? $plant->origin,
                 'length' => $plant->length,
                 'fruit_production_month' => $plant->fruit_production_month,
                 'max_temp' => $plant->max_temp,
@@ -50,7 +50,10 @@ class UserPlantController extends Controller
                 'type' => 'required|string|max:255',
                 'last_watered' => 'required|date',
                 'planted_date' => 'required|date',
+                'description' => 'required|string|max:500',
+                'origin' => 'required|string|max:255',
                 'watering_frequency' => 'required|integer|min:1|max:30',
+                'image' => 'nullable|url|max:500',
             ]);
             
             $user = Auth::user();
@@ -88,7 +91,10 @@ class UserPlantController extends Controller
                 $user->favoritePlants()->updateExistingPivot($plant->id, [
                     'last_watered' => $validated['last_watered'],
                     'planted_date' => $validated['planted_date'],
+                    'description' => $validated['description'],
+                    'origin' => $validated['origin'],
                     'watering_frequency' => $validated['watering_frequency'],
+                    'image' => $validated['image'],
                     'custom_name' => $validated['name'], 
                 ]);
             } else {
@@ -98,7 +104,10 @@ class UserPlantController extends Controller
                 $user->favoritePlants()->attach($plant->id, [
                     'last_watered' => $validated['last_watered'],
                     'planted_date' => $validated['planted_date'],
+                    'description' => $validated['description'],
+                    'origin' => $validated['origin'],
                     'watering_frequency' => $validated['watering_frequency'],
+                    'image' => $validated['image'],
                     'custom_name' => $validated['name'],
                 ]);
             }
