@@ -148,7 +148,7 @@ export default function ProfileMe() {
       const token = localStorage.getItem('access_token');
       if (!token) return;
       
-      const response = await fetch('/api/user-plants', {
+      const response = await fetch('http://127.0.0.1:8000/api/user-plants', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
