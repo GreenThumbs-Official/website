@@ -16,6 +16,11 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->ulid('plant_id');
             $table->foreign('plant_id')->references('id')->on('plants')->onDelete('cascade');
+            $table->date('last_watered')->nullable();
+            $table->integer('watering_frequency')->default(7);
+            $table->timestamps();
+            
+            $table->primary(['user_id', 'plant_id']);
         });
     }
 

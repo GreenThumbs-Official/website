@@ -25,7 +25,11 @@ import { Plus, Leaf, Calendar, Droplets, Trash2, CheckCircle } from 'lucide-reac
 export default function UserIndex() {
   const [userPlants, setUserPlants] = useState([]);
   const [isAddPlantDialogOpen, setIsAddPlantDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [plantToDelete, setPlantToDelete] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [availablePlantsLoading, setAvailablePlantsLoading] = useState(false);
+  const [availablePlants, setAvailablePlants] = useState([]);
   const [newPlant, setNewPlant] = useState({
     name: '',
     type: '',
@@ -33,22 +37,54 @@ export default function UserIndex() {
     wateringFrequency: 7
   });
 
-  const availablePlants = [
-    { id: 'monstera', name: 'Monstera deliciosa', frequency: 7 },
-    { id: 'ficus', name: 'Ficus benjamina', frequency: 5 },
-    { id: 'cactus', name: 'Cactus', frequency: 21 },
-    { id: 'pothos', name: 'Pothos', frequency: 7 },
-    { id: 'snake-plant', name: 'Sansevieria', frequency: 14 },
-    { id: 'peace-lily', name: 'Spathiphyllum', frequency: 7 },
-    { id: 'rubber-tree', name: 'Ficus elastica', frequency: 7 },
-    { id: 'philodendron', name: 'Philodendron', frequency: 7 }
-  ];
-
   useEffect(() => {
-    setTimeout(() => {
-      setUserPlants([]);
-      setLoading(false);
-    }, 1000);
+    const fetchUserPlants = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('access_token');
+        
+        if (!token) {
+          console.error('Aucun token trouvé');
+          setLoading(false);
+          return;
+        }
+        
+        const response = await fetch('http://127.0.0.1:8000/api/user-plants', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data && Array.isArray(data)) {
+          const formattedPlants = data.map(plant => ({
+            id: plant.id,
+            name: plant.name,
+            type: plant.type || plant.name, 
+            lastWatered: plant.last_watered || new Date().toISOString().split('T')[0],
+            wateringFrequency: plant.watering_frequency || 7,
+            nextWatering: calculateNextWatering(plant.last_watered || new Date().toISOString().split('T')[0], plant.watering_frequency || 7),
+            health: getPlantHealth(plant.last_watered || new Date().toISOString().split('T')[0], 
+                      calculateNextWatering(plant.last_watered || new Date().toISOString().split('T')[0], plant.watering_frequency || 7))
+          }));
+          
+          setUserPlants(formattedPlants);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des plantes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUserPlants();
   }, []);
 
   const calculateNextWatering = (lastWatered, frequency) => {
@@ -68,22 +104,97 @@ export default function UserIndex() {
     return 'Attention';
   };
 
-  const markAsWatered = (plantId) => {
-    const today = new Date().toISOString().split('T')[0];
-    setUserPlants(prev => prev.map(plant => {
-      if (plant.id === plantId) {
-        const nextWatering = calculateNextWatering(today, plant.wateringFrequency);
-        const health = getPlantHealth(today, nextWatering);
-        return {
-          ...plant,
-          lastWatered: today,
-          nextWatering: nextWatering,
-          health: health
-        };
+  const markAsWatered = async (plantId) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return;
       }
-      return plant;
-    }));
+      
+      const today = new Date().toISOString().split('T')[0];
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/user-plants/${plantId}/water`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          last_watered: today
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      setUserPlants(prev => prev.map(plant => {
+        if (plant.id === plantId) {
+          const nextWatering = calculateNextWatering(today, plant.wateringFrequency);
+          const health = getPlantHealth(today, nextWatering);
+          return {
+            ...plant,
+            lastWatered: today,
+            nextWatering: nextWatering,
+            health: health
+          };
+        }
+        return plant;
+      }));
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de l\'arrosage:', error);
+      alert('Une erreur est survenue lors de la mise à jour de l\'arrosage. Veuillez réessayer.');
+    }
   };
+  
+  useEffect(() => {
+    const fetchAvailablePlants = async () => {
+      try {
+        setAvailablePlantsLoading(true);
+        const token = localStorage.getItem('access_token');
+        
+        if (!token) {
+          console.error('Aucun token trouvé');
+          return;
+        }
+        
+        const response = await fetch('http://127.0.0.1:8000/api/plants', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data && data.data && Array.isArray(data.data)) {
+          const apiPlants = data.data.map(plant => ({
+            id: plant.id,
+            name: plant.name,
+            frequency: plant.watering_frequency || 7,
+            image: plant.image
+          }));
+          
+          if (apiPlants.length > 0) {
+            setAvailablePlants(apiPlants);
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des plantes disponibles:', error);
+      } finally {
+        setAvailablePlantsLoading(false);
+      }
+    };
+    
+    fetchAvailablePlants();
+  }, []);
 
   const userColumns = [
     {
@@ -126,7 +237,10 @@ export default function UserIndex() {
           <Button
             size="sm"
             variant="destructive"
-            onClick={() => manageRemovePlant(row.id)}
+            onClick={() => {
+              setPlantToDelete(row);
+              setIsDeleteDialogOpen(true);
+            }}
             className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 text-xs"
             title="Supprimer la plante"
           >
@@ -138,33 +252,93 @@ export default function UserIndex() {
     }
   ];
 
-  const manageAddPlant = () => {
+  const manageAddPlant = async () => {
     if (!newPlant.name || !newPlant.type || !newPlant.lastWatered) {
       alert('Veuillez remplir tous les champs');
       return;
     }
 
-    const selectedPlantType = availablePlants.find(p => p.id === newPlant.type);
-    const nextWatering = calculateNextWatering(newPlant.lastWatered, selectedPlantType.frequency);
-    const health = getPlantHealth(newPlant.lastWatered, nextWatering);
+    try {
+      const selectedPlantType = availablePlants.find(p => p.id === newPlant.type);
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return;
+      }
+      
+      const plantData = {
+        name: newPlant.name,
+        type: selectedPlantType.name,
+        last_watered: newPlant.lastWatered,
+        watering_frequency: selectedPlantType.frequency
+      };
+      
+      const response = await fetch('http://127.0.0.1:8000/api/user-plants', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(plantData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      const nextWatering = calculateNextWatering(newPlant.lastWatered, selectedPlantType.frequency);
+      const health = getPlantHealth(newPlant.lastWatered, nextWatering);
 
-    const plantToAdd = {
-      id: Date.now(),
-      name: newPlant.name,
-      type: selectedPlantType.name,
-      lastWatered: newPlant.lastWatered,
-      nextWatering: nextWatering,
-      health: health,
-      wateringFrequency: selectedPlantType.frequency
-    };
+      const plantToAdd = {
+        id: data.id || Date.now(),
+        name: newPlant.name,
+        type: selectedPlantType.name,
+        lastWatered: newPlant.lastWatered,
+        nextWatering: nextWatering,
+        health: health,
+        wateringFrequency: selectedPlantType.frequency
+      };
 
-    setUserPlants(prev => [...prev, plantToAdd]);
-    setNewPlant({ name: '', type: '', lastWatered: '', wateringFrequency: 7 });
-    setIsAddPlantDialogOpen(false);
+      setUserPlants(prev => [...prev, plantToAdd]);
+      setNewPlant({ name: '', type: '', lastWatered: '', wateringFrequency: 7 });
+      setIsAddPlantDialogOpen(false);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de la plante:', error);
+      alert('Une erreur est survenue lors de l\'ajout de la plante. Veuillez réessayer.');
+    }
   };
 
-  const manageRemovePlant = (plantId) => {
-    setUserPlants(prev => prev.filter(plant => plant.id !== plantId));
+  const manageRemovePlant = async (plantId) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return;
+      }
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/user-plants/${plantId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      setUserPlants(prev => prev.filter(plant => plant.id !== plantId));
+      setIsDeleteDialogOpen(false);
+      setPlantToDelete(null);
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la plante:', error);
+      alert('Une erreur est survenue lors de la suppression de la plante. Veuillez réessayer.');
+    }
   };
 
   if (loading) {
@@ -232,20 +406,29 @@ export default function UserIndex() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="plant-type">Type de plante</Label>
-                          <Select onValueChange={(value) => setNewPlant(prev => ({ ...prev, type: value }))}>
+                          <Select 
+                            value={newPlant.type}
+                            onValueChange={(value) => setNewPlant(prev => ({ ...prev, type: value }))}
+                          >
                             <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                               <SelectValue placeholder="Sélectionner le type" />
                             </SelectTrigger>
                             <SelectContent className="bg-gray-800 border-gray-700">
-                              {availablePlants.map((plant) => (
-                                <SelectItem 
-                                  key={plant.id} 
-                                  value={plant.id}
-                                  className="text-white hover:bg-gray-700"
-                                >
-                                  {plant.name}
-                                </SelectItem>
-                              ))}
+                              {availablePlantsLoading ? (
+                                <div className="text-center p-2 text-white">Chargement...</div>
+                              ) : availablePlants.length > 0 ? (
+                                availablePlants.map((plant) => (
+                                  <SelectItem 
+                                    key={plant.id} 
+                                    value={plant.id}
+                                    className="text-white hover:bg-gray-700"
+                                  >
+                                    {plant.name}
+                                  </SelectItem>
+                                ))
+                              ) : (
+                                <div className="text-center p-2 text-white">Aucune plante disponible</div>
+                              )}
                             </SelectContent>
                           </Select>
                         </div>
@@ -257,6 +440,7 @@ export default function UserIndex() {
                             value={newPlant.lastWatered}
                             onChange={(e) => setNewPlant(prev => ({ ...prev, lastWatered: e.target.value }))}
                             className="bg-gray-800 border-gray-700 text-white"
+                            max={new Date().toISOString().split('T')[0]}
                           />
                         </div>
                       </div>
@@ -327,15 +511,21 @@ export default function UserIndex() {
                   <SelectValue placeholder="Sélectionner le type" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
-                  {availablePlants.map((plant) => (
-                    <SelectItem 
-                      key={plant.id} 
-                      value={plant.id}
-                      className="text-white hover:bg-gray-700"
-                    >
-                      {plant.name}
-                    </SelectItem>
-                  ))}
+                  {availablePlantsLoading ? (
+                    <div className="text-center p-2 text-white">Chargement...</div>
+                  ) : availablePlants.length > 0 ? (
+                    availablePlants.map((plant) => (
+                      <SelectItem 
+                        key={plant.id} 
+                        value={plant.id}
+                        className="text-white hover:bg-gray-700"
+                      >
+                        {plant.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="text-center p-2 text-white">Aucune plante disponible</div>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -347,6 +537,7 @@ export default function UserIndex() {
                 value={newPlant.lastWatered}
                 onChange={(e) => setNewPlant(prev => ({ ...prev, lastWatered: e.target.value }))}
                 className="bg-gray-800 border-gray-700 text-white"
+                max={new Date().toISOString().split('T')[0]}
               />
             </div>
           </div>
@@ -366,6 +557,40 @@ export default function UserIndex() {
               className="bg-green-600 hover:bg-green-700 text-white"
             >
               Ajouter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="bg-gray-900 text-white border-gray-700 max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-white text-opacity-90">
+              Êtes-vous sûr de vouloir supprimer {plantToDelete?.name} de votre collection ?
+            </p>
+            <p className="text-white text-opacity-70 text-sm mt-2">
+              Cette action est irréversible et toutes les données associées à cette plante seront perdues.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setPlantToDelete(null);
+              }}
+              className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+            >
+              Annuler
+            </Button>
+            <Button 
+              onClick={() => plantToDelete && manageRemovePlant(plantToDelete.id)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Supprimer
             </Button>
           </DialogFooter>
         </DialogContent>

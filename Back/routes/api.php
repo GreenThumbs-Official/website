@@ -7,6 +7,7 @@ use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\IntrestController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserPlantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -27,6 +28,12 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/complete-onboarding', [AuthController::class, 'completeOnboarding']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
+    
+    // Routes pour la gestion des plantes des utilisateurs
+    Route::get('/user-plants', [UserPlantController::class, 'index']);
+    Route::post('/user-plants', [UserPlantController::class, 'store']);
+    Route::delete('/user-plants/{plant}', [UserPlantController::class, 'destroy']);
+    Route::put('/user-plants/{plant}/water', [UserPlantController::class, 'water']);
 });
 
 /**
