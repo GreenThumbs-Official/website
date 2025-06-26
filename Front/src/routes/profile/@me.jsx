@@ -604,10 +604,10 @@ export default function ProfileMe() {
                 )}
               </div>
               <Button 
-                onClick={() => setIsAddPlantDialogOpen(true)}
+                onClick={() => navigate('/dash/user')}
                 className="bg-primary hover:bg-primary/90"
               >
-                Ajouter une plante
+                Gérer mes plantes
               </Button>
             </CardHeader>
             <CardContent>
@@ -637,10 +637,10 @@ export default function ProfileMe() {
                     Commencez à ajouter vos plantes pour suivre leur croissance !
                   </p>
                   <Button 
-                    onClick={() => setIsAddPlantDialogOpen(true)}
+                    onClick={() => navigate('/dash/user')}
                     className="bg-primary hover:bg-primary/90"
                   >
-                    Ajouter ma première plante
+                    Gérer mes plantes
                   </Button>
                 </div>
               ) : (
