@@ -119,7 +119,7 @@ function Details(){
             return <span>{node}</span>;
         }
         return (
-            <section className="bg-green-600 rounded-lg p-4 my-4 mx-auto max-w-3xl">
+            <section className="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-lg p-4 my-4 mx-auto max-w-3xl shadow-md">
                 {Object.entries(node).map(([key, value]) => (
                     <div key={key} className="mb-2">
                         <strong className="capitalize text-green-900">{key}:</strong>
@@ -166,8 +166,10 @@ function Details(){
     }
 
     return (
-        <section className="py-8 px-4">
-            <div className="max-w-4xl mx-auto bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 rounded-3xl p-8 transition-all duration-300">
+        <section className="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-lg p-4 my-4 mx-auto max-w-3xl shadow-md">
+
+            <div className="max-w-4xl mx-auto bg-white bg-opacity-10 backdrop-blur-xl border border-white border-opacity-30 rounded-3xl shadow-xl p-8 transition-all duration-300">
+
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
                     {plantData.default_image && (
                         <img
@@ -183,7 +185,7 @@ function Details(){
                         <div className="space-y-4">
                             <p className="text-white">{plantData.description}</p>
 
-                            <div className="bg-white bg-opacity-10 p-4 rounded-lg">
+                            <div className="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 p-4 rounded-lg shadow-md">
                                 <h4 className="text-lg font-semibold text-white mb-2">Caractéristiques</h4>
                                 <p className="text-white">Taille maximale : {formatMaxHeight(plantData.dimensions)}</p>
                                 {plantData.origin && plantData.origin.length > 0 && (
@@ -194,7 +196,12 @@ function Details(){
                     </div>
                 </div>
             </div>
-            <button onClick={generatePlantTutorial} >Generate Tutorial</button>
+            <button
+                onClick={generatePlantTutorial}
+                className="mt-6 px-6 py-2 bg-white bg-opacity-10 backdrop-blur-md border border-white border-opacity-20 rounded-lg text-white shadow-md hover:bg-opacity-20 transition"
+            >
+                Générer le tutoriel
+            </button>
             {tutorial && renderTutorial(tutorial)}
         </section>
     );
