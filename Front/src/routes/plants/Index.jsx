@@ -6,7 +6,7 @@ import config from '@/config.json';
 
 const API_URL = config.api.plants;
 
-function Plants() {
+function Plants({ filters, onFilterChange }) {
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,7 +17,15 @@ function Plants() {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(API_URL);
+        // Construire l'URL avec les paramètres de filtre
+        const url = new URL(API_URL);
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value && value !== '') {
+            url.searchParams.append(key, value);
+          }
+        });
+        
+        const response = await fetch(url.toString());
         
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
@@ -39,7 +47,7 @@ function Plants() {
     };
 
     fetchPlants();
-  }, []);
+  }, [filters]);
 
   if (loading) {
     return (
@@ -53,12 +61,24 @@ function Plants() {
   }
 
   if (error) {
+    const isRateLimitError = error.includes('429');
     return (
       <section className="flex justify-center items-center min-h-96">
         <div className="text-center">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            <p className="font-bold">Erreur de chargement</p>
-            <p>{error}</p>
+          <div className={`border px-4 py-3 rounded ${
+            isRateLimitError 
+              ? 'bg-yellow-100 border-yellow-400 text-yellow-700'
+              : 'bg-red-100 border-red-400 text-red-700'
+          }`}>
+            <p className="font-bold">
+              {isRateLimitError ? 'Limite de requêtes atteinte' : 'Erreur de chargement'}
+            </p>
+            <p>
+              {isRateLimitError 
+                ? 'Trop de requêtes ont été envoyées à l\'API. Veuillez patienter quelques instants avant de réessayer. Cette limitation provient du serveur et non de votre connexion.'
+                : error
+              }
+            </p>
           </div>
         </div>
       </section>
@@ -74,19 +94,30 @@ function Plants() {
         >
           <div className="text-center">
             <h3 className="text-xl font-semibold text-white mb-4">
-              {plant.common_name}
+              {plant.name}
             </h3>
             
-            {plant.image_url && (
+            {plant.image && (
               <img 
-                src={plant.image_url} 
-                alt={plant.common_name}
+                src={plant.image} 
+                alt={plant.name}
                 className="w-full h-48 object-cover rounded-lg mb-4"
                 onError={(e) => {
                   e.target.style.display = 'none';
                 }}
               />
             )}
+            
+            <div className="text-sm text-gray-200 mb-4">
+              <p><strong>Origine:</strong> {plant.origin}</p>
+              <p><strong>Taille:</strong> {plant.length} cm</p>
+              {plant.fruit_production_month && (
+                <p><strong>Production:</strong> Mois {plant.fruit_production_month}</p>
+              )}
+              <p><strong>Température:</strong> {plant.min_temp}°C - {plant.max_temp}°C</p>
+            </div>
+            
+            <p className="text-gray-300 text-sm mb-4">{plant.description}</p>
             
             <a 
               href={`plants/${plant.id}`}
@@ -102,17 +133,22 @@ function Plants() {
 }
 
 export default function PlantsPage() {
+    const [filters, setFilters] = useState({});
+
+    const handleFilterChange = (newFilters) => {
+        setFilters(newFilters);
+    };
 
     return (
-        <div className="flex flex-col gap-12 items-start justify-start pt-10 pl-16 min-h-screen bg-[#6fbc29] text-white overflow-hidden">
+        <div className="flex flex-col gap-4 items-start justify-start pt-10 pl-16 min-h-screen bg-[#6fbc29] text-white overflow-hidden">
             <Background />
             <Header />
-            {/* <PlantFilter /> */}
             <h2 className="text-5xl font-light mt-28 ml-12 leading-tight">Les différents types de plantes !</h2>
-            <Plants />
+            <PlantFilter filters={filters} onFilterChange={handleFilterChange} />
+            <div className="w-full px-12">
+                <Plants filters={filters} onFilterChange={handleFilterChange} />
+            </div>
         </div>
     )
-
-
 }
 
