@@ -95,7 +95,7 @@ class GeminiController extends Controller
 
         $chat = $client->withV1BetaVersion()
             ->generativeModel(Modelname::GEMINI_1_5_FLASH)
-            ->withSystemInstruction('You are a chatbot that gives straightforward and concise answers to user questions, respond in french unless if the user speaks in an other language or asks for you to respond in an other language, if the question is not related to plant do not answer.')
+            ->withSystemInstruction('You are a chatbot that gives straightforward and concise answers to user questions, respond in french unless if the user speaks in an other language or asks for you to respond in an other language, if the question is not strictly related to plants do not answer.')
             ->startChat()
             ->withHistory($history);
 
