@@ -58,8 +58,11 @@ export default function PlantCareGuide() {
   }, []);
 
   const fetchGuide = async () => {
+    if (!selectedPlant) return;
+
     setLoading(true);
     setError(null);
+
 
     const responseFormat = `{
       id: 1,
@@ -116,8 +119,8 @@ export default function PlantCareGuide() {
         ]
       }
     }`
-    const prompt = `Tu dois generer UNIQUEMENT un objet JSON valide pour un guide de soin de plante, sans aucun texte supplementaire avant ou apres. DONNEES DE LA PLANTE: ${JSON.stringify(selectedPlant)} STRUCTURE EXACTE A SUIVRE: Voir response_format ci-dessous. Genere le JSON maintenant:`;
-
+    const { image, ...plantWithoutImage } = selectedPlant;
+    const prompt = `Tu dois generer UNIQUEMENT un objet JSON valide pour un guide de soin de plante, sans aucun texte supplementaire avant ou apres. DONNEES DE LA PLANTE: ${JSON.stringify(plantWithoutImage)} STRUCTURE EXACTE A SUIVRE: Voir response_format ci-dessous. Genere le JSON maintenant:`;
     const body = {
       prompt: prompt,
       response_syntax: 'json',
@@ -137,6 +140,7 @@ export default function PlantCareGuide() {
 
         const guide = await response.json();
         setGuide(guide.response);
+        setLoading(false);
     } catch (err) {
         setError(err.message);
     }
@@ -147,11 +151,14 @@ export default function PlantCareGuide() {
   const managePlantSelect = (plantId) => {
     const plant = plants.find(p => p.id === plantId);
     setSelectedPlant(plant);
-    console.log(selectedPlant, plants)
-    fetchGuide();
+
     setIsPlantDialogOpen(false);
     setActiveTab('general');
   };
+
+  useEffect(() => {
+    fetchGuide()
+  }, [selectedPlant]);
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
