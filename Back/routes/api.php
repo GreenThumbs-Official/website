@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Routes pour la gestion des plantes des utilisateurs
     Route::get('/user-plants', [UserPlantController::class, 'index']);
     Route::post('/user-plants', [UserPlantController::class, 'store']);
+    Route::put('/user-plants/{plant}', [UserPlantController::class, 'update']);
     Route::delete('/user-plants/{plant}', [UserPlantController::class, 'destroy']);
     Route::put('/user-plants/{plant}/water', [UserPlantController::class, 'water']);
     
@@ -49,6 +50,7 @@ Route::get('/plants/{plant}', [PlantController::class, 'show']);
 Route::get('/intrests', [IntrestController::class, 'index']);
 
 Route::get('/favorites', [FavoriteController::class, 'index']);
+Route::post('/favorites', [FavoriteController::class, 'store']);
 Route::middleware(['auth:sanctum', 'can:isAdmin'])->group(function () {
     // Routes pour la gestion des plantes
     Route::post('/plants', [PlantController::class, 'store']);

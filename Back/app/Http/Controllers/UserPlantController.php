@@ -33,6 +33,7 @@ class UserPlantController extends Controller
                 'max_temp' => $plant->max_temp,
                 'min_temp' => $plant->min_temp,
                 'last_watered' => $plant->pivot->last_watered ?? null,
+                'planted_date' => $plant->pivot->planted_date ?? null,
                 'watering_frequency' => $plant->pivot->watering_frequency ?? 7,
                 'growth_progress' => $plant->pivot->growth_progress ?? 0,
             ];
@@ -51,6 +52,7 @@ class UserPlantController extends Controller
                 'name' => 'required|string|max:255',
                 'type' => 'required|string|max:255',
                 'last_watered' => 'required|date',
+                'planted_date' => 'required|date',
                 'description' => 'required|string|max:500',
                 'origin' => 'required|string|max:255',
                 'watering_frequency' => 'required|integer|min:1|max:30',
@@ -91,6 +93,7 @@ class UserPlantController extends Controller
                 // Mettre à jour les données du pivot au lieu d'ajouter une nouvelle entrée
                 $user->favoritePlants()->updateExistingPivot($plant->id, [
                     'last_watered' => $validated['last_watered'],
+                    'planted_date' => $validated['planted_date'],
                     'description' => $validated['description'],
                     'origin' => $validated['origin'],
                     'watering_frequency' => $validated['watering_frequency'],
@@ -103,6 +106,7 @@ class UserPlantController extends Controller
                 // Ajouter la plante à la collection de l'utilisateur avec les données du pivot
                 $user->favoritePlants()->attach($plant->id, [
                     'last_watered' => $validated['last_watered'],
+                    'planted_date' => $validated['planted_date'],
                     'description' => $validated['description'],
                     'origin' => $validated['origin'],
                     'watering_frequency' => $validated['watering_frequency'],
@@ -119,6 +123,7 @@ class UserPlantController extends Controller
                 'name' => $validated['name'],
                 'type' => $plant->name,
                 'last_watered' => $validated['last_watered'],
+                'planted_date' => $validated['planted_date'],
                 'watering_frequency' => $validated['watering_frequency'],
             ], 201);
             
@@ -127,6 +132,110 @@ class UserPlantController extends Controller
             return response()->json(['error' => 'Validation failed', 'details' => $e->errors()], 422);
         } catch (\Exception $e) {
             \Log::error('Erreur lors de l\'ajout d\'une plante:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'An unexpected error occurred', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Update the specified plant in the user's collection.
+     */
+    public function update(Request $request, string $plantId)
+    {
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'type' => 'required|string|max:255',
+                'last_watered' => 'required|date',
+                'planted_date' => 'required|date',
+                'description' => 'required|string|max:500',
+                'origin' => 'required|string|max:255',
+                'watering_frequency' => 'required|integer|min:1|max:30',
+                'image' => 'nullable|url|max:500',
+            ]);
+            
+            $user = Auth::user();
+            
+            \Log::info('Données reçues pour la modification d\'une plante:', $validated);
+            
+            // Vérifier si la plante existe dans la collection de l'utilisateur
+            $userPlant = $user->favoritePlants()->where('plants.id', $plantId)->first();
+            
+            if (!$userPlant) {
+                return response()->json(['error' => 'Plant not found in user\'s collection'], 404);
+            }
+            
+            // Rechercher la plante par son nom (type)
+            $plant = Plant::where('name', $validated['type'])->first();
+            
+            if (!$plant) {
+                // Si la plante n'existe pas, créer une nouvelle plante
+                \Log::info('Création d\'une nouvelle plante:', ['name' => $validated['type']]);
+                
+                $plant = Plant::create([
+                    'name' => $validated['type'],
+                    'description' => 'Plante ajoutée par l\'utilisateur',
+                    'image' => null,
+                    'origin' => null,
+                    'length' => null,
+                    'fruit_production_month' => null,
+                    'max_temp' => null,
+                    'min_temp' => null,
+                ]);
+            }
+            
+            // Si le type de plante a changé, détacher l'ancienne et attacher la nouvelle
+            if ($userPlant->id !== $plant->id) {
+                // Détacher l'ancienne plante
+                $user->favoritePlants()->detach($plantId);
+                
+                // Attacher la nouvelle plante avec les données mises à jour
+                $user->favoritePlants()->attach($plant->id, [
+                    'last_watered' => $validated['last_watered'],
+                    'planted_date' => $validated['planted_date'],
+                    'description' => $validated['description'],
+                    'origin' => $validated['origin'],
+                    'watering_frequency' => $validated['watering_frequency'],
+                    'image' => $validated['image'],
+                    'custom_name' => $validated['name'],
+                    'growth_progress' => $userPlant->pivot->growth_progress ?? 0,
+                ]);
+                
+                $plantId = $plant->id;
+            } else {
+                // Mettre à jour les données du pivot pour la même plante
+                $user->favoritePlants()->updateExistingPivot($plantId, [
+                    'last_watered' => $validated['last_watered'],
+                    'planted_date' => $validated['planted_date'],
+                    'description' => $validated['description'],
+                    'origin' => $validated['origin'],
+                    'watering_frequency' => $validated['watering_frequency'],
+                    'image' => $validated['image'],
+                    'custom_name' => $validated['name'],
+                ]);
+            }
+            
+            return response()->json([
+                'id' => $plantId,
+                'name' => $validated['name'],
+                'type' => $plant->name,
+                'last_watered' => $validated['last_watered'],
+                'planted_date' => $validated['planted_date'],
+                'description' => $validated['description'],
+                'origin' => $validated['origin'],
+                'watering_frequency' => $validated['watering_frequency'],
+                'image' => $validated['image'],
+            ], 200);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Erreur de validation lors de la modification d\'une plante:', ['errors' => $e->errors()]);
+            return response()->json(['error' => 'Validation failed', 'details' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la modification d\'une plante:', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import Background from '@/components/ui/background';
 import { cn } from '@/lib/utils';
+import { LogOut } from 'lucide-react';
+import useAuth from '@/lib/hooks/useAuth';
 
 export default function Sidebar ({ className, children, userType = 'user', ...props }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { logout } = useAuth();
   
   const adminMenuItems = [
     { label: 'Home', href: '/', icon: '🏠' },
@@ -77,6 +80,16 @@ export default function Sidebar ({ className, children, userType = 'user', ...pr
                     <span className="font-medium">{item.label}</span>
                   </a>
                 ))}
+                <button
+                  onClick={() => {
+                    logout();
+                    toggleMobileMenu();
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition-all duration-200 w-full text-left"
+                >
+                  <LogOut size={20} />
+                  <span className="font-medium">Déconnexion</span>
+                </button>
               </nav>
             </div>
           </div>
@@ -103,6 +116,13 @@ export default function Sidebar ({ className, children, userType = 'user', ...pr
                   <span className="font-medium">{item.label}</span>
                 </a>
               ))}
+              <button
+                onClick={logout}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition-all duration-200 w-full text-left"
+              >
+                <LogOut size={20} />
+                <span className="font-medium">Déconnexion</span>
+              </button>
             </nav>
           </div>
         </aside>

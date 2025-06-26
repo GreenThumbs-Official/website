@@ -46,23 +46,23 @@ export default function OnBoarding() {
         },
       });
       
-      // Récupérer les plantes
-      const plantsResponse = await fetch('http://127.0.0.1:8000/api/plants', {
+      // Récupérer les favoris pour l'onboarding
+      const favoritesResponse = await fetch('http://127.0.0.1:8000/api/favorites', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
       
-      if (!interestsResponse.ok || !plantsResponse.ok) {
+      if (!interestsResponse.ok || !favoritesResponse.ok) {
         throw new Error('Erreur lors de la récupération des données');
       }
       
       const interestsData = await interestsResponse.json();
-      const plantsData = await plantsResponse.json();
+      const favoritesData = await favoritesResponse.json();
       
       setInterests(interestsData);
-      setPlants(plantsData.data || []);
+      setPlants(favoritesData || []);
     } catch (error) {
       console.error('Erreur:', error);
       setError('Impossible de charger les données. Veuillez réessayer plus tard.');

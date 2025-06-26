@@ -21,7 +21,19 @@ class FavoriteController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'image' => 'nullable|string',
+            'origin' => 'nullable|string',
+            'length' => 'nullable|string',
+            'fruit_production_month' => 'nullable|string',
+            'max_temp' => 'nullable|integer',
+            'min_temp' => 'nullable|integer',
+        ]);
+
+        $favorite = Favorite::create($request->all());
+        return response()->json($favorite, 201);
     }
 
     /**

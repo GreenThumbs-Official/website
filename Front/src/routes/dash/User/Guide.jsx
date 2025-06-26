@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Sidebar from '@/components/Nav/Sidebar';
 import { Droplets, Sun, Thermometer, Scissors, Bug, Heart } from 'lucide-react';
+import ChatBot from '@/components/ui/chatbot';
 
 export default function PlantCareGuide() {
   const [selectedPlant, setSelectedPlant] = useState(null);
@@ -608,6 +609,7 @@ export default function PlantCareGuide() {
           </Card>
         )}
       </div>
+      <ChatBot />
     </Sidebar>
   );
 }
