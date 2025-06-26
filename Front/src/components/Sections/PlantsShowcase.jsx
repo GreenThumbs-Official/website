@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function PlantsShowcase() {
   const [randomPlants, setRandomPlants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
   
   useEffect(() => {
     const fetchPlants = async () => {
@@ -61,7 +63,10 @@ export default function PlantsShowcase() {
                 />
                 <div className="p-6">
                   <h3 className="text-xl font-normal mb-2">{plant.name}</h3>
-                  <button className="w-full py-2 rounded-full bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 hover:bg-opacity-30 transition-all">
+                  <button 
+                    onClick={() => navigate(`/plants/${plant.id}`)}
+                    className="w-full py-2 rounded-full bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 hover:bg-opacity-30 transition-all"
+                  >
                     Voir la plante
                   </button>
                 </div>
