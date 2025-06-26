@@ -48,6 +48,7 @@ export default function AdminIndex() {
   const navigate = useNavigate();
   const [usersData, setUsersData] = useState([]);
   const [plantsData, setPlantsData] = useState([]);
+  const [advicesData, setAdvicesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -61,13 +62,16 @@ export default function AdminIndex() {
   
   const [currentUserPage, setCurrentUserPage] = useState(1);
   const [currentPlantPage, setCurrentPlantPage] = useState(1);
+  const [currentAdvicePage, setCurrentAdvicePage] = useState(1);
   const [totalUserPages, setTotalUserPages] = useState(1);
   const [totalPlantPages, setTotalPlantPages] = useState(1);
+  const [totalAdvicePages, setTotalAdvicePages] = useState(1);
   const itemsPerPage = 3;
 
   useEffect(() => {
     fetchUsers();
     fetchPlants();
+    fetchAdvices();
   }, []);
 
   const fetchUsers = async () => {
@@ -124,6 +128,30 @@ export default function AdminIndex() {
       console.error('Erreur:', error);
       setError(error.message);
       setPlantsData([]);
+      setLoading(false);
+    }
+  };
+
+  const fetchAdvices = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://127.0.0.1:8000/api/advices');
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const responseData = await response.json();
+      const data = responseData.data || responseData;
+      const advicesArray = Array.isArray(data) ? data : [];
+      
+      setAdvicesData(advicesArray);
+      setTotalAdvicePages(Math.ceil(advicesArray.length / itemsPerPage));
+      setLoading(false);
+    } catch (error) {
+      console.error('Erreur:', error);
+      setError(error.message);
+      setAdvicesData([]);
       setLoading(false);
     }
   };
@@ -203,6 +231,12 @@ export default function AdminIndex() {
               className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30"
             >
               Gérer les plantes
+            </Button>
+            <Button 
+              onClick={() => navigate('/dash/admin/advices')} 
+              className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30"
+            >
+              Gérer les conseils
             </Button>
           </div>
         </div>
@@ -295,7 +329,7 @@ export default function AdminIndex() {
           </DialogContent>
         </Dialog>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-6">
           <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 text-white">
             <CardHeader>
               <CardTitle>Utilisateurs récents</CardTitle>
@@ -525,6 +559,132 @@ export default function AdminIndex() {
                   </Button>
                   <Button 
                     onClick={() => navigate('/dash/admin/plants')} 
+                    className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+                  >
+                    Ajouter
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border border-white border-opacity-20 text-white">
+            <CardHeader>
+              <CardTitle>Conseils récents</CardTitle>
+              <CardDescription className="text-white text-opacity-60">Liste des derniers conseils ajoutés</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-white border-opacity-20">
+                      <TableHead className="text-white">Nom</TableHead>
+                      <TableHead className="text-white">Catégorie</TableHead>
+                      <TableHead className="text-white">Description</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center text-white text-opacity-60 py-4">
+                          Chargement des données...
+                        </TableCell>
+                      </TableRow>
+                    ) : error ? (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center text-white text-opacity-60 py-4">
+                          Erreur: {error}
+                        </TableCell>
+                      </TableRow>
+                    ) : Array.isArray(advicesData) && advicesData.length > 0 ? advicesData
+                      .slice((currentAdvicePage - 1) * itemsPerPage, currentAdvicePage * itemsPerPage)
+                      .map((advice) => (
+                        <TableRow key={advice.id} className="border-b border-white border-opacity-10">
+                          <TableCell className="text-white">{advice.name}</TableCell>
+                          <TableCell className="text-white">
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              advice.category === 'starter' ? 'bg-green-500 bg-opacity-20 text-green-300' :
+                              advice.category === 'advanced' ? 'bg-yellow-500 bg-opacity-20 text-yellow-300' :
+                              advice.category === 'pro' ? 'bg-red-500 bg-opacity-20 text-red-300' :
+                              'bg-gray-500 bg-opacity-20 text-gray-300'
+                            }`}>
+                              {advice.category === 'starter' ? 'Débutant' :
+                               advice.category === 'advanced' ? 'Avancé' :
+                               advice.category === 'pro' ? 'Expert' : advice.category || 'Non spécifié'}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-white">
+                            {advice.description ? 
+                              (advice.description.length > 50 ? 
+                                advice.description.substring(0, 50) + '...' : 
+                                advice.description) : 
+                              'Aucune description'}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    : (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center text-white text-opacity-60 py-4">
+                          Aucun conseil trouvé
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="mt-4">
+                <Pagination>
+                  <PaginationContent>
+                    {currentAdvicePage > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => setCurrentAdvicePage(prev => Math.max(prev - 1, 1))} 
+                          className="bg-white bg-opacity-20 text-white hover:bg-white hover:bg-opacity-30 hover:text-black"
+                        />
+                      </PaginationItem>
+                    )}
+                    
+                    {Array.from({ length: Math.min(totalAdvicePages, 3) }, (_, i) => {
+                      const pageNumber = i + 1;
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationLink 
+                            onClick={() => setCurrentAdvicePage(pageNumber)}
+                            isActive={currentAdvicePage === pageNumber}
+                            className="bg-white bg-opacity-20 text-white hover:bg-white hover:bg-opacity-30 hover:text-black"
+                          >
+                            {pageNumber}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })}
+                    
+                    {totalAdvicePages > 3 && (
+                      <PaginationItem>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+                    
+                    {currentAdvicePage < totalAdvicePages && (
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => setCurrentAdvicePage(prev => Math.min(prev + 1, totalAdvicePages))} 
+                          className="bg-white bg-opacity-20 text-white hover:bg-white hover:bg-opacity-30 hover:text-black"
+                        />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+                
+                <div className="flex gap-2 mt-4">
+                  <Button 
+                    onClick={() => navigate('/dash/admin/advices')} 
+                    className="flex-1 bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30"
+                  >
+                    Voir tous
+                  </Button>
+                  <Button 
+                    onClick={() => navigate('/dash/admin/advices')} 
                     className="flex-1 bg-green-500 hover:bg-green-600 text-white"
                   >
                     Ajouter
