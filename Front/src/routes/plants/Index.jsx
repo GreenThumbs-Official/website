@@ -61,12 +61,24 @@ function Plants({ filters, onFilterChange }) {
   }
 
   if (error) {
+    const isRateLimitError = error.includes('429');
     return (
       <section className="flex justify-center items-center min-h-96">
         <div className="text-center">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            <p className="font-bold">Erreur de chargement</p>
-            <p>{error}</p>
+          <div className={`border px-4 py-3 rounded ${
+            isRateLimitError 
+              ? 'bg-yellow-100 border-yellow-400 text-yellow-700'
+              : 'bg-red-100 border-red-400 text-red-700'
+          }`}>
+            <p className="font-bold">
+              {isRateLimitError ? 'Limite de requêtes atteinte' : 'Erreur de chargement'}
+            </p>
+            <p>
+              {isRateLimitError 
+                ? 'Trop de requêtes ont été envoyées à l\'API. Veuillez patienter quelques instants avant de réessayer. Cette limitation provient du serveur et non de votre connexion.'
+                : error
+              }
+            </p>
           </div>
         </div>
       </section>
