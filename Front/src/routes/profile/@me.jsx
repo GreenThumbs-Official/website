@@ -20,7 +20,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import Header from '@/components/Nav/Header';
 import Background from '@/components/ui/background';
-import { User, Mail, Calendar, MapPin, Edit, Save, X, Camera, Loader2 } from 'lucide-react';
+import { User, Mail, Calendar, MapPin, Edit, Save, X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { parseISO } from 'date-fns';
 import {
@@ -413,12 +413,6 @@ export default function ProfileMe() {
                       {user.username.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <Button
-                    size="sm"
-                    className="absolute bottom-0 right-0 rounded-full w-10 h-10 p-0 bg-primary hover:bg-primary/90"
-                  >
-                    <Camera className="w-4 h-4" />
-                  </Button>
                 </div>
 
                 <div className="flex-1 text-center md:text-left">
