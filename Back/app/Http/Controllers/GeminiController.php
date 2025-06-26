@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use GeminiAPI\Client;
+use GeminiAPI\Enums\Role;
+use GeminiAPI\Resources\Content;
 use GeminiAPI\Resources\Parts\TextPart;
 use GeminiAPI\GenerationConfig;
 use GeminiAPI\Resources\ModelName;
@@ -73,4 +75,43 @@ class GeminiController extends Controller
             'clean_response' => $clean
         ]);
     }
+
+    public function Chat(Request $request) {
+        $request->validate([
+            'history' => 'nullable',
+            'prompt' => 'required|max:1000',
+        ]);
+
+        if (isset($request->history)) {
+            $messages = json_decode($request->history);;
+            $history = [];
+            foreach ($messages as $message) {
+                $history[] = Content::text($message->parts[0]->text, Role::from($message->role));
+            }
+        } else {
+            $history = [];
+        }
+        $client = new Client("AIzaSyCYl6E40mBmhP-gg4tjeJ6u6cKfqPFV2sQ");
+
+        $chat = $client->withV1BetaVersion()
+            ->generativeModel(Modelname::GEMINI_1_5_FLASH)
+            ->withSystemInstruction('You are a chatbot that gives straightforward and concise answers to user questions.')
+            ->startChat()
+            ->withHistory($history);
+
+        $response = $chat->sendMessage(new TextPart($request->prompt));
+
+        $history[] = Content::text($request->prompt, Role::User);
+        $history[] = Content::text($response->text(), Role::Model);
+        return response()->json([
+            'prompt' => $request->prompt,
+            'response' => $response->text(),
+            'history' => $history,
+        ]);
+
+    }
 }
+
+
+
+

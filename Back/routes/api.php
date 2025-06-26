@@ -42,7 +42,7 @@ Route::middleware(['auth:sanctum', 'can:isAdmin'])->group(function () {
     Route::post('/plants', [PlantController::class, 'store']);
     Route::put('/plants/{plant}', [PlantController::class, 'update']);
     Route::delete('/plants/{plant}', [PlantController::class, 'destroy']);
-    
+
     // Routes pour la gestion des utilisateurs
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users', [UserController::class, 'store']);
@@ -54,6 +54,7 @@ Route::middleware(['auth:sanctum', 'can:isAdmin'])->group(function () {
 Route::apiResource('tutorials', TutorialController::class)->only(['store', 'show']);
 
 Route::post('/handle-prompt', [GeminiController::class, 'handlePrompt']);
+Route::post('/handle-chat', [GeminiController::class, 'chat']);
 
 
 
