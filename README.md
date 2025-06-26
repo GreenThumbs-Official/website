@@ -1,6 +1,6 @@
 # GreenThumbs
 
-...
+niveaux. Que vous soyez débutant ou expérimenté, nous vous aidons à créer et entretenir un potager à domicile, que vous viviez en appartement ou en maison.
 
 ## Prerequisites
 
@@ -75,7 +75,6 @@
 - 🟩 Vue mobile - 2h
 - ✅ Vue tablette - 2h
 - ✅ Vue PC - 4h
-- ✅ Darkmode - 2h
 - ✅ Affichage de la page des résultats - 1h
 - ✅ Affichage de la page des résultats des utilisateur - 1h
 - ✅ Page des plantes - 2h
