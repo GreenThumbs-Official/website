@@ -73,12 +73,20 @@ class User extends Authenticatable
     }
 
     /**
-     * The favorite plants that belong to the user.
+     * The favorite plants that belong to the user (for profile management).
      */
     public function favoritePlants()
     {
         return $this->belongsToMany(Plant::class, 'user_plants')
                     ->withPivot('last_watered', 'watering_frequency', 'custom_name', 'description', 'origin', 'image', 'growth_progress')
                     ->withTimestamps();
+    }
+
+    /**
+     * The favorite plants from onboarding (stored in favorites table).
+     */
+    public function onboardingFavorites()
+    {
+        return $this->belongsToMany(Favorite::class, 'user_favorite');
     }
 }

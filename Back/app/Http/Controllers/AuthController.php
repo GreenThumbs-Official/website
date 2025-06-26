@@ -76,7 +76,8 @@ class AuthController extends Controller
             $user->interests()->sync($interests);
         }
         if (is_array($favoritePlants)) {
-            $user->favoritePlants()->sync($favoritePlants);
+            // Store favorite plants in the favorites table, not in user profile
+            $user->onboardingFavorites()->sync($favoritePlants);
         }
 
         $user->onboarding_completed = true;

@@ -50,6 +50,7 @@ Route::get('/plants/{plant}', [PlantController::class, 'show']);
 Route::get('/intrests', [IntrestController::class, 'index']);
 
 Route::get('/favorites', [FavoriteController::class, 'index']);
+Route::post('/favorites', [FavoriteController::class, 'store']);
 Route::middleware(['auth:sanctum', 'can:isAdmin'])->group(function () {
     // Routes pour la gestion des plantes
     Route::post('/plants', [PlantController::class, 'store']);
